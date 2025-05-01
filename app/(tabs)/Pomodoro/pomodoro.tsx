@@ -1,9 +1,13 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet, Button } from 'react-native';
 
 export default function Tab() {
+  const router = useRouter();  
+
   return (
     <View style={styles.container}>
       <Text>Tab</Text>
+      <Button title='Generate' onPress={() => router.push("/Pomodoro/treeReward")}/>
     </View>
   );
 }

@@ -107,7 +107,6 @@ function draw() {
   
   for(let i = 0; i < numGens; i ++) {
     word = generate();
-    console.log(word);
   }
   
   // Draw L-System
@@ -120,10 +119,6 @@ function draw() {
     }  
   }
   pop();
-}
-
-function mouseReleased() {
-  draw();
 }
 
 function generate() {
@@ -160,12 +155,10 @@ function chooseOne(ruleSet) {
   return "";
 }
 
-
-
-
-
-
-
+function saveCanvasImage() {
+  const base64 = canvas.toDataURL('image/png');
+  window.ReactNativeWebView.postMessage(base64);
+}
         </script>
       </body>
     </html>
