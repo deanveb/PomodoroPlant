@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { View, Button, Alert, StyleSheet, Text } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import * as FileSystem from 'expo-file-system';
-import { htmlContent } from './htmlText';
+import { htmlContent } from '../../../lib/htmlText';
 import { useRouter } from 'expo-router';
 // No longer need MediaLibrary since we're saving to the app's files
 // 
@@ -33,7 +33,6 @@ export default function App() {
           console.error(error);
         }
       };
-      // TODO: Create a image folder then put the image in it for organisation
       await handleCreateFolder();
 
       // Save to app's document directory instead of the gallery
