@@ -1,12 +1,18 @@
-import { useRouter } from "expo-router";
-import { View, Text, Button, Image } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { View, Text, Button, Image, TouchableOpacity } from "react-native";
 import * as FileSystem from "expo-file-system";
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useEffect, useState } from "react";
+
+interface treeInfo {
+  treeLayout : Map<string, string>,
+}
 
 export default function InventoryScreen() {
   const router = useRouter();
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { btnName } = useLocalSearchParams();
 
   useEffect(() => {
     const loadFiles = async () => {
@@ -26,6 +32,25 @@ export default function InventoryScreen() {
     loadFiles();
   }, []);
 
+  const handleChoose = (name : string) => {
+    const info = {
+      [btnName as string]: name
+    };
+    
+    const storeData = async (key :string, value : object) => {
+      try {
+        const jsonValue = JSON.stringify(value);
+        await AsyncStorage.setItem(key, jsonValue);
+      } catch (e) {
+        console.error("while string data: ",e);
+      }
+    };
+
+    storeData('treeLayout', info);
+
+    router.back();
+  }
+
   return (
     <View style={{ flex: 1, padding: 20 }}>
       {error ? (
@@ -34,20 +59,23 @@ export default function InventoryScreen() {
         <>
           {fileNames.map((name, index) => {
             if (name.includes(".png")) {
-              return <Image 
-                key={index}
-                source = {{uri : FileSystem.documentDirectory+"trees/"+name}}
-                style = {{ width: 300, height: 300 }}
-              /> 
+              return (
+              <TouchableOpacity onPress={() => handleChoose(name)}>
+                <Image
+                  key={index}
+                  source = {{uri : FileSystem.documentDirectory+"trees/"+name}}
+                  style = {{ width: 300, height: 300 }}
+                />
+              </TouchableOpacity>
+              )
             }
-            // <Text key={index}>{name}</Text>
           })}
         </>
       )}
       
       <Button 
         title="Back to Garden"
-        onPress={() => router.push("/(tabs)/garden")}
+        onPress={() => router.back()}
       />
     </View>
   );
