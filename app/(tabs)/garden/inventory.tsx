@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { View, Text, Button, Image, TouchableOpacity } from "react-native";
+import { View, Text, Button, Image, TouchableOpacity, ScrollView } from "react-native";
 import * as FileSystem from "expo-file-system";
 import { useEffect, useState } from "react";
 
@@ -28,14 +28,14 @@ export default function InventoryScreen() {
         setFileNames(files);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error occurred');
-        console.error('Error reading directory:', err);
+        // console.error('Error reading directory:', err);
       }
     };
 
     loadFiles();
   }, []);
 
-  const handleChoose = async (name : string) => {
+  const handleChoose = async (target : string ,name : string) => {
     const fileUri = FileSystem.documentDirectory + 'treeLayout.json';
 
     const checkExist = async () => {
@@ -83,8 +83,7 @@ export default function InventoryScreen() {
       layoutData.layout = {};
     }
 
-    // layoutData.layout.set(buttonName, name);
-    layoutData.layout[buttonName] = name;
+    layoutData.layout[target] = name;
     console.log(layoutData);
 
     const storeData = async (value : treeLayoutInfo) => {
@@ -109,26 +108,34 @@ export default function InventoryScreen() {
   return (
     <View style={{ flex: 1, padding: 20 }}>
       {error ? (
-        <Text style={{ color: 'red' }}>Error: {error}</Text>
+        <Text style={{ color: 'red' }}>No tree here</Text>
       ) : (
-        <>
+        <ScrollView>
           {fileNames.map((name, index) => {
             if (name.includes(".png")) {
               return (
-              <TouchableOpacity key={index} onPress={() => handleChoose(name)}>
-                <Image
-                  source = {{uri : FileSystem.documentDirectory+"trees/"+name}}
-                  style = {{ width: 300, height: 300 }}
-                />
-              </TouchableOpacity>
+                <>
+                  {/* <Checkbox /> */}
+                  <TouchableOpacity key={index} onPress={() => handleChoose(buttonName, name)}>
+                    <Image
+                      source = {{uri : FileSystem.documentDirectory+"trees/"+name}}
+                      style = {{ width: 300, height: 300, borderWidth: 10,}}
+                    />
+                  </TouchableOpacity>
+                </>
               )
             }
           })}
-        </>
+        </ScrollView>
       )}
+
+      <Button 
+        title="Xóa cây khỏi chậu"
+        onPress={() => handleChoose(buttonName, "")}
+      />
       
       <Button 
-        title="Back to Garden"
+        title="Back"
         onPress={() => router.back()}
       />
     </View>

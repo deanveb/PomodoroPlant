@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { View, Text, StyleSheet, Button, Pressable, Image} from 'react-native';
+import { View, Text, StyleSheet, Button, Pressable, Image, ImageBackground} from 'react-native';
 import * as FileSystem from "expo-file-system";
 import { useEffect, useState } from 'react';
 
@@ -7,7 +7,7 @@ interface treeLayoutInfo {
   layout : Record<string, string>,
 }
 
-export default async function Tab() {
+export default  function Tab() {
   const router = useRouter();
   const [fileContent, setFileContent] = useState<treeLayoutInfo>();
 
@@ -70,17 +70,17 @@ export default async function Tab() {
   };
 
   const layoutData = fileContent ? fileContent.layout : {};
-  console.log(layoutData);
+  const backgroundImg = require("../../../assets/images/background.png");
 
   return (
-    <View>
+    <View style={styles.container}>
       {/* <Text></Text> */}
       <Pressable onPress={() => router.push(
         {
           pathname : "/(tabs)/garden/inventory",
           params : {name : "pot"}
         })}>
-        {"pot" in layoutData ? (
+        {"pot" in layoutData && layoutData["pot"] ? (
           <Image
             source={{uri : FileSystem.documentDirectory+"trees/"+layoutData["pot"]}}
             style={{width: 300, height: 300}}
@@ -95,8 +95,8 @@ export default async function Tab() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundImage : '../../../assets/images/background.png',
+    width : '100%',
+    height : '100%',
   },
 });

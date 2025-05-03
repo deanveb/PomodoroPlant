@@ -44,8 +44,8 @@ export default function App() {
       });
       
       // Display the file location
-      console.log('Image saved to:', fileUri);
-      Alert.alert('Success', `Image saved to app's documents directory:\n${fileUri}`);
+      // console.log('Image saved to:', fileUri);
+      Alert.alert('Bỏ cây thành công');
     } catch (err: any) {
       console.error('Error saving image:', err);
       Alert.alert('Error', err.message);
@@ -69,7 +69,7 @@ export default function App() {
             onPress={() => router.push("/(tabs)/Pomodoro/pomodoro")}
         />
         <Button
-          title="Save to App Directory"
+          title="Thêm cây vào túi"
           onPress={() => {
             webviewRef.current?.injectJavaScript('saveCanvasImage(); true;');
           }}

@@ -100,8 +100,6 @@ function setup() {
 }
 
 function draw() {
-  background(28);
-  
   // Generate our L-System from the start
   word = "X";
   

@@ -5,17 +5,17 @@ export default function TabLayout() {
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: 'blue', headerShown: false}}>
       <Tabs.Screen
-        name="pomodoro"
+        name="Pomodoro"
         options={{
           title: 'Pomodoro',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="clock-o" color={color} />,
         }}
       />
       <Tabs.Screen
         name="garden"
         options={{
           title: 'Garden',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="cog" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="tree" color={color} />,
         }}
       />
     </Tabs>
