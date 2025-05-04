@@ -1,7 +1,10 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { View, Text, Button, Image, TouchableOpacity, ScrollView } from "react-native";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { View, Text, Button, ScrollView } from "react-native";
 import * as FileSystem from "expo-file-system";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import TreeDisplay from "@/components/TreeDisplay";
+import useChoose from "@/hooks/useChoose";
 
 interface treeLayoutInfo {
   layout : Record<string, string>,
@@ -11,10 +14,12 @@ export default function InventoryScreen() {
   const router = useRouter();
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [fileContent, setFileContent] = useState<treeLayoutInfo>();
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [selectedDelete, setSelectedDelete] = useState<string[]>([]);
+  const handleChoose = useChoose();
+
   const { name } = useLocalSearchParams();
   const buttonName = name as string;
-
 
   useEffect(() => {
     console.log(buttonName);
@@ -35,78 +40,53 @@ export default function InventoryScreen() {
     loadFiles();
   }, []);
 
-  const handleChoose = async (target : string ,name : string) => {
-    const fileUri = FileSystem.documentDirectory + 'treeLayout.json';
+  // FIXME: tree list not updating when enter garnder tab
+  useFocusEffect(() => {
+    
+  });
 
-    const checkExist = async () => {
-      const fileExist = FileSystem.getInfoAsync(fileUri);
-      if (!(await fileExist).exists) {
-        try {
-          const fileUri = FileSystem.documentDirectory + 'treeLayout.json';
-          await FileSystem.writeAsStringAsync(
-            fileUri,
-            '{}',
-            { encoding: FileSystem.EncodingType.UTF8 }
-          );
-
-        } catch (e) {
-          console.error("while creating empty file: ",e);
-        }
-      }
-    }
-    checkExist();
-
-    const getData = async () => {
-      const fileUri = FileSystem.documentDirectory + 'treeLayout.json';
-        try {
-          const FileContent = await FileSystem.readAsStringAsync(fileUri, {
-            encoding: FileSystem.EncodingType.UTF8
-          });
-          
-          const jsonData = JSON.parse(FileContent) as treeLayoutInfo;
-          console.log('File content inventory:', jsonData);
-          return jsonData
-        } catch (e) {
-          console.error("while getting data: ",e);
-          return null;
-        }
-    };
-    const layoutData = await getData();
-
-    if (!layoutData) {
-      console.error("layoutData does not exist");
-      return;
-    }
-
-    if (!layoutData.layout) {
-      console.log(typeof layoutData);
-      layoutData.layout = {};
-    }
-
-    layoutData.layout[target] = name;
-    console.log(layoutData);
-
-    const storeData = async (value : treeLayoutInfo) => {
+  const handleDelete = () => {
+    setDeleteMode(false);
+    const fileUri = FileSystem.documentDirectory + 'trees/';
+    selectedDelete.forEach(async (tree) => {
       try {
-        const jsonValue = JSON.stringify(value);
-        const fileUri = FileSystem.documentDirectory + 'treeLayout.json';
-        await FileSystem.writeAsStringAsync(
-          fileUri,
-          jsonValue,
-          { encoding: FileSystem.EncodingType.UTF8 }
-        );
-        console.log(jsonValue);
-      } catch (e) {
-        console.error("while storing data: ",e);
+        await FileSystem.deleteAsync(fileUri + tree);
+      } catch(e) {
+        console.error('Error deleting file:', error);
+      }
+    })
+
+    setSelectedDelete([]);
+    const loadFiles = async () => {
+      try {
+        const fileDirectory = FileSystem.documentDirectory + "trees/";
+        if (!fileDirectory) {
+          throw new Error('Directory does not exist');
+        }
+        const files = await FileSystem.readDirectoryAsync(fileDirectory);
+        setFileNames(files);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error occurred');
+        // console.error('Error reading directory:', err);
       }
     };
-    storeData(layoutData);
 
-    router.push("/(tabs)/garden");
+    loadFiles();
   }
 
   return (
     <View style={{ flex: 1, padding: 20 }}>
+      <Button 
+        title= {deleteMode ? "deleteMode" : "normalMode"}
+        onPress={() => setDeleteMode(d => !d)}
+      />
+      {
+        selectedDelete.length != 0 &&
+        <Button 
+          title="accept"
+          onPress={handleDelete}
+        />
+      }
       {error ? (
         <Text style={{ color: 'red' }}>No tree here</Text>
       ) : (
@@ -115,13 +95,14 @@ export default function InventoryScreen() {
             if (name.includes(".png")) {
               return (
                 <>
-                  {/* <Checkbox /> */}
-                  <TouchableOpacity key={index} onPress={() => handleChoose(buttonName, name)}>
-                    <Image
-                      source = {{uri : FileSystem.documentDirectory+"trees/"+name}}
-                      style = {{ width: 300, height: 300, borderWidth: 10,}}
-                    />
-                  </TouchableOpacity>
+                  <TreeDisplay 
+                    key={index} 
+                    treeName={name} 
+                    buttonName={buttonName} 
+                    isDeleting={deleteMode} 
+                    pushBeingDelete={(newTree) => {setSelectedDelete(s => [...s, newTree])}} 
+                    removeBeingDelete={(Tree) => {setSelectedDelete(s => s.filter(item => item != Tree))}}
+                  />
                 </>
               )
             }

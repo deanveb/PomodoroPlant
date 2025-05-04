@@ -43,9 +43,6 @@ export default function App() {
         encoding: FileSystem.EncodingType.Base64,
       });
       
-      // Display the file location
-      // console.log('Image saved to:', fileUri);
-      Alert.alert('Bỏ cây thành công');
     } catch (err: any) {
       console.error('Error saving image:', err);
       Alert.alert('Error', err.message);
