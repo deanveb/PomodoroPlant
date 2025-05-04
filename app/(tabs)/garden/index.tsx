@@ -1,49 +1,45 @@
-import { useRouter } from 'expo-router';
-import { View, Text, StyleSheet, Button, Pressable, Image, ImageBackground} from 'react-native';
+import { useRouter } from "expo-router";
+import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import * as FileSystem from "expo-file-system";
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-interface treeLayoutInfo {
-  layout : Record<string, string>,
+interface TreeLayoutInfo {
+  layout: Record<string, string>;
 }
 
-export default  function Tab() {
+export default function Tab() {
   const router = useRouter();
-  const [fileContent, setFileContent] = useState<treeLayoutInfo>();
+  const [fileContent, setFileContent] = useState<TreeLayoutInfo>();
 
   useEffect(() => {
-    const fileUri = FileSystem.documentDirectory + 'treeLayout.json';
+    const fileUri = FileSystem.documentDirectory + "treeLayout.json";
     const checkExist = async () => {
-      const fileExist = FileSystem.getInfoAsync(fileUri);
-      if (!(await fileExist).exists) {
+      const fileExist = await FileSystem.getInfoAsync(fileUri);
+      if (!fileExist.exists) {
         try {
-          const fileUri = FileSystem.documentDirectory + 'treeLayout.json';
-          await FileSystem.writeAsStringAsync(
-            fileUri,
-            '{}',
-            { encoding: FileSystem.EncodingType.UTF8 }
-          );
-
+          await FileSystem.writeAsStringAsync(fileUri, "{}", {
+            encoding: FileSystem.EncodingType.UTF8,
+          });
         } catch (e) {
-          console.error("while creating empty file: ",e);
+          console.error("Error while creating empty file: ", e);
         }
       }
-    }
+    };
     checkExist();
 
-    // FIXME: when file just got created, getting data might not be necessary
     const getData = async () => {
-        try {
-          const fileContent = await FileSystem.readAsStringAsync(fileUri, {
-            encoding: FileSystem.EncodingType.UTF8
-          });
-          
-          const jsonData = JSON.parse(fileContent) as treeLayoutInfo;
-          console.log('File content:', jsonData);
-          setFileContent(jsonData);
-        } catch (e) {
-          return null;
-        }
+      try {
+        const fileContent = await FileSystem.readAsStringAsync(fileUri, {
+          encoding: FileSystem.EncodingType.UTF8,
+        });
+
+        const jsonData = JSON.parse(fileContent) as TreeLayoutInfo;
+        console.log("File content:", jsonData);
+        setFileContent(jsonData);
+      } catch (e) {
+        console.error("Error reading file content: ", e);
+        return null;
+      }
     };
 
     getData();
@@ -52,51 +48,95 @@ export default  function Tab() {
   const deleteAllFiles = async () => {
     try {
       if (!FileSystem.documentDirectory) {
-        return
+        return;
       }
-      const files = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory);
-      
+      const files = await FileSystem.readDirectoryAsync(
+        FileSystem.documentDirectory
+      );
+
       await Promise.all(
         files.map(async (file) => {
           const fileUri = `${FileSystem.documentDirectory}${file}`;
           await FileSystem.deleteAsync(fileUri);
         })
       );
-      
-      console.log('All files in document directory deleted');
+
+      console.log("All files in document directory deleted");
     } catch (error) {
-      console.error('Error deleting files:', error);
+      console.error("Error deleting files:", error);
     }
   };
 
   const layoutData = fileContent ? fileContent.layout : {};
-  const backgroundImg = require("../../../assets/images/background.png");
+  const hasPotTree = layoutData && "pot" in layoutData && layoutData["pot"];
 
   return (
     <View style={styles.container}>
-      {/* <Text></Text> */}
-      <Pressable onPress={() => router.push(
-        {
-          pathname : "/(tabs)/garden/inventory",
-          params : {name : "pot"}
-        })}>
-        {"pot" in layoutData && layoutData["pot"] ? (
+      <Image
+        source={require("@/assets/images/background.png")}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      />
+      <TouchableOpacity
+        style={hasPotTree ? styles.treeContainer : styles.potContainer}
+        onPress={() =>
+          router.push({
+            pathname: "/(tabs)/garden/inventory",
+            params: { name: "pot" },
+          })
+        }
+      >
+        {hasPotTree ? (
           <Image
-            source={{uri : FileSystem.documentDirectory+"trees/"+layoutData["pot"]}}
-            style={{width: 300, height: 300}}
+            source={{
+              uri: FileSystem.documentDirectory + "trees/" + layoutData["pot"],
+            }}
+            style={styles.tree}
+            resizeMode="contain"
           />
         ) : (
-          <Text>+</Text>
+          <Image
+            source={require("@/assets/images/pot.png")}
+            style={styles.pot}
+          />
         )}
-      </Pressable>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundImage : '../../../assets/images/background.png',
-    width : '100%',
-    height : '100%',
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingBottom: 100,
+  },
+  backgroundImage: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    zIndex: -1,
+  },
+  potContainer: {
+    position: "absolute",
+    bottom: 100,
+    alignItems: "center",
+  },
+  treeContainer: {
+    position: "absolute",
+    bottom: 0,
+    alignItems: "center",
+  },
+  pot: {
+    width: 50,
+    height: 50,
+  },
+  tree: {
+    width: 300,
+    height: 400,
+    marginBottom: -50, // Adjust to make tree base align with pot position
   },
 });

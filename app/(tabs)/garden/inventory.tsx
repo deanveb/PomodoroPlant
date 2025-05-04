@@ -6,10 +6,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import TreeDisplay from "@/components/TreeDisplay";
 import useChoose from "@/hooks/useChoose";
 
-interface treeLayoutInfo {
-  layout : Record<string, string>,
-}
-
 export default function InventoryScreen() {
   const router = useRouter();
   const [fileNames, setFileNames] = useState<string[]>([]);
@@ -22,18 +18,18 @@ export default function InventoryScreen() {
   const buttonName = name as string;
 
   const loadFiles = async () => {
-      try {
-        const fileDirectory = FileSystem.documentDirectory + "trees/";
-        if (!fileDirectory) {
-          throw new Error('Directory does not exist');
-        }
-        const files = await FileSystem.readDirectoryAsync(fileDirectory);
-        setFileNames(files);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error occurred');
-        // console.error('Error reading directory:', err);
+    try {
+      const fileDirectory = FileSystem.documentDirectory + "trees/";
+      if (!fileDirectory) {
+        throw new Error("Directory does not exist");
       }
-    };
+      const files = await FileSystem.readDirectoryAsync(fileDirectory);
+      setFileNames(files);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error occurred");
+      // console.error('Error reading directory:', err);
+    }
+  };
 
   useEffect(() => {
     console.log(buttonName);
@@ -50,65 +46,64 @@ export default function InventoryScreen() {
 
   const handleDelete = () => {
     setDeleteMode(false);
-    const fileUri = FileSystem.documentDirectory + 'trees/';
+    const fileUri = FileSystem.documentDirectory + "trees/";
     selectedDelete.forEach(async (tree) => {
       try {
         await FileSystem.deleteAsync(fileUri + tree);
-      } catch(e) {
-        console.error('Error deleting file:', error);
+      } catch (e) {
+        console.error("Error deleting file:", error);
       }
-    })
+    });
 
     setSelectedDelete([]);
-    
+
     loadFiles();
-  }
+  };
 
   return (
     <View style={{ flex: 1, padding: 20 }}>
-      <Button 
-        title= {deleteMode ? "deleteMode" : "normalMode"}
-        onPress={() => setDeleteMode(d => !d)}
+      <Button
+        title={deleteMode ? "deleteMode" : "normalMode"}
+        onPress={() => setDeleteMode((d) => !d)}
       />
-      {
-        selectedDelete.length != 0 &&
-        <Button 
-          title="accept"
-          onPress={handleDelete}
-        />
-      }
+      {selectedDelete.length != 0 && (
+        <Button title="accept" onPress={handleDelete} />
+      )}
       {error ? (
-        <Text style={{ color: 'red' }}>No tree here</Text>
+        <Text style={{ color: "red" }}>No tree here</Text>
       ) : (
         <ScrollView>
           {fileNames.map((name, index) => {
             if (name.includes(".png")) {
               return (
                 <>
-                  <TreeDisplay 
-                    key={index} 
-                    treeName={name} 
-                    buttonName={buttonName} 
-                    isDeleting={deleteMode} 
-                    pushBeingDelete={(newTree) => {setSelectedDelete(s => [...s, newTree])}} 
-                    removeBeingDelete={(Tree) => {setSelectedDelete(s => s.filter(item => item != Tree))}}
+                  <TreeDisplay
+                    key={index}
+                    treeName={name}
+                    buttonName={buttonName}
+                    isDeleting={deleteMode}
+                    pushBeingDelete={(newTree) => {
+                      setSelectedDelete((s) => [...s, newTree]);
+                    }}
+                    removeBeingDelete={(Tree) => {
+                      setSelectedDelete((s) =>
+                        s.filter((item) => item != Tree)
+                      );
+                    }}
                   />
                 </>
-              )
+              );
             }
           })}
         </ScrollView>
       )}
 
-      <Button 
+      <Button
         title="Xóa cây khỏi chậu"
         onPress={() => handleChoose(buttonName, "")}
       />
-      
-      <Button 
-        title="Back"
-        onPress={() => router.back()}
-      />
+
+      <Button title="Back" onPress={() => router.back()} />
     </View>
   );
 }
