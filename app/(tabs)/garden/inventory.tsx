@@ -1,7 +1,7 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { View, Text, Button, ScrollView } from "react-native";
 import * as FileSystem from "expo-file-system";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import TreeDisplay from "@/components/TreeDisplay";
 import useChoose from "@/hooks/useChoose";
@@ -21,9 +21,7 @@ export default function InventoryScreen() {
   const { name } = useLocalSearchParams();
   const buttonName = name as string;
 
-  useEffect(() => {
-    console.log(buttonName);
-    const loadFiles = async () => {
+  const loadFiles = async () => {
       try {
         const fileDirectory = FileSystem.documentDirectory + "trees/";
         if (!fileDirectory) {
@@ -37,13 +35,18 @@ export default function InventoryScreen() {
       }
     };
 
+  useEffect(() => {
+    console.log(buttonName);
+
     loadFiles();
   }, []);
 
   // FIXME: tree list not updating when enter garnder tab
-  useFocusEffect(() => {
-    
-  });
+  useFocusEffect(
+    useCallback(() => {
+      loadFiles();
+    }, [])
+  );
 
   const handleDelete = () => {
     setDeleteMode(false);
@@ -57,20 +60,7 @@ export default function InventoryScreen() {
     })
 
     setSelectedDelete([]);
-    const loadFiles = async () => {
-      try {
-        const fileDirectory = FileSystem.documentDirectory + "trees/";
-        if (!fileDirectory) {
-          throw new Error('Directory does not exist');
-        }
-        const files = await FileSystem.readDirectoryAsync(fileDirectory);
-        setFileNames(files);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error occurred');
-        // console.error('Error reading directory:', err);
-      }
-    };
-
+    
     loadFiles();
   }
 
