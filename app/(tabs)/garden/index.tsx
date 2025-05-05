@@ -2,10 +2,7 @@ import { useRouter } from "expo-router";
 import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import * as FileSystem from "expo-file-system";
 import { useEffect, useState } from "react";
-
-interface TreeLayoutInfo {
-  layout: Record<string, string>;
-}
+import { TreeLayoutInfo } from "@/interfaces";
 
 export default function Tab() {
   const router = useRouter();
@@ -22,6 +19,7 @@ export default function Tab() {
           });
         } catch (e) {
           console.error("Error while creating empty file: ", e);
+          return;
         }
       }
     };
