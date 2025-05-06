@@ -43,7 +43,6 @@ const PomodoroTimer = () => {
   }, []);
 
   useFocusEffect(() => {
-
     const getData = async () => {
       try {
         const FileContent = await FileSystem.readAsStringAsync(fileUri, {
@@ -59,21 +58,24 @@ const PomodoroTimer = () => {
       }
     };
     getData();
+  });
 
+  useEffect(() => {
     const breakMode = breakDuration.current === shortBreakDuration ? "shortBreak" : "longBreak";
 
     if (fileContent) {
       ({
-        shortBreakDuration : shortBreakDuration,
-        longBreakDuration : longBreakDuration,
-        workDuration : workDuration,
+        shortBreakDuration: shortBreakDuration,
+        longBreakDuration: longBreakDuration,
+        workDuration: workDuration,
+        session: longBreakInterval,
       } = fileContent);
     }
 
     breakDuration.current = breakMode === 'shortBreak' ? shortBreakDuration : longBreakDuration;
-
+    
     resetTimer();
-  });
+  }, [fileContent]);
 
   // Timer logic
   useEffect(() => {
@@ -141,23 +143,21 @@ const PomodoroTimer = () => {
   return (
     <View>
       <Text>Pomodoro Timer</Text>
-      
+
       <View>
-        <Link
-          href={"/(tabs)/Pomodoro/setting"}
-        >Setting</Link>
+        <Link href={"/(tabs)/Pomodoro/setting"}>Setting</Link>
       </View>
 
       <View>
-        <TouchableOpacity onPress={() => switchMode('work')}>
+        <TouchableOpacity onPress={() => switchMode("work")}>
           <Text>Work</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => switchMode('break')}>
+        <TouchableOpacity onPress={() => switchMode("break")}>
           <Text>Break</Text>
         </TouchableOpacity>
       </View>
 
-      <Text>{mode === 'work' ? 'Work Time' : 'Break Time'}</Text>
+      <Text>{mode === "work" ? "Work Time" : "Break Time"}</Text>
       <Text>{formatTime(timeLeft)}</Text>
 
       <View>

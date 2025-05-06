@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import * as FileSystem from "expo-file-system";
-import { View, Text, Switch, TextInput, StyleSheet, TouchableOpacity} from "react-native";
+import { View, Text, Switch, TextInput, StyleSheet, TouchableOpacity, ScrollView} from "react-native";
 import { router, useFocusEffect, useRouter } from "expo-router";
 import { setting } from "@/interfaces";
 import { useSharedValue } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
+
 
 export default function App() {
   const router = useRouter();
@@ -11,6 +13,7 @@ export default function App() {
     work : "25",
     shortBreak : "5",
     longBreak : "15",
+    session : "2",
   })
   const [error, setError] = useState<string>();
   const [fileContent, setFileContent] = useState<setting>();
@@ -79,15 +82,13 @@ export default function App() {
       workDuration : 0,
       shortBreakDuration : 0,
       longBreakDuration : 0,
+      session : 0,
     }
 
     for (const [key, value] of Object.entries(setting)) {
       if (value !== "") {
-        if (parseInt(value)) {
-          data[key+"Duration" as keyof setting] = parseInt(value) * 60; 
-
-        } else {
-          setError(`${key} không hợp lệ(chỉ có thể ghi chữ số)`);
+        if (!parseInt(value)) {
+          setError(`${key} không hợp lệ(chỉ có thể ghi chữ số và các số lớn hơn 0)`);
           return;
         }
       } else {
@@ -95,6 +96,12 @@ export default function App() {
         return;
       }
     } 
+
+    data.session = parseInt(setting.session);
+    data.longBreakDuration = parseInt(setting.longBreak) * 60;
+    data.shortBreakDuration = parseInt(setting.shortBreak) * 60;
+    data.workDuration = parseInt(setting.work) * 60;
+
 
     // console.log(`data:${data}`);
 
@@ -104,85 +111,153 @@ export default function App() {
   };
 
   return (
-    <View>
-      <TextInput
-        style={styles.input}
-        onChangeText={(text) => {
-          setSetting(prev => ({...prev, work : text}))
-        }}
-        value={String(setting.work)}
-        inputMode="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        onChangeText={(text) => {
-          setSetting(prev => ({...prev, shortBreak : text}));
-        }}
-        value={String(setting.shortBreak)}
-        inputMode="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        onChangeText={(text) => {
-          setSetting(prev => ({...prev, longBreak : text}))
-        }}
-        value={String(setting.longBreak)}
-        inputMode="numeric"
-      />
-
-      { error && <Text>Error: {error} </Text> }
-
-      <TouchableOpacity onPress={handleSave}>
-        <Text>Save</Text>
-      </TouchableOpacity>
-    </View>
+	<View style={styles.backgroundContainer}>
+    <View style={styles.container}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>
+              <Ionicons name="settings-outline" size={34} color="black" /> Settings
+            </Text>
+          </View>
+    
+          <ScrollView>
+            <View style={styles.settingContainer}>
+              <Text style={styles.subtitle}>Time</Text>
+              <View style={styles.timeContainer}>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Work duration</Text>
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={(text) => {
+                      setSetting(prev => ({...prev, work : text}))
+                    }}
+                    value={String(setting.work)}
+                    inputMode="numeric"
+                  />
+                </View>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Short break</Text>
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={(text) => {
+                      setSetting(prev => ({...prev, shortBreak : text}));
+                    }}
+                    value={String(setting.shortBreak)}
+                    inputMode="numeric"
+                  />
+                </View>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Long break</Text>
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={(text) => {
+                      setSetting(prev => ({...prev, longBreak : text}))
+                    }}
+                    value={String(setting.longBreak)}
+                    inputMode="numeric"
+                  />
+                </View>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Sessions</Text>
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={(text) => {
+                      setSetting(prev => ({...prev, session : text}))
+                    }}
+                    value={String(setting.session)}
+                    inputMode="numeric"
+                  />
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+          <View>
+            <TouchableOpacity style={styles.button} onPress={handleSave}>
+              <Text style={styles.buttonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+  </View>
   )
 }
 
 const styles = StyleSheet.create({
+  backgroundContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center', 
+    backgroundColor: '#f0f0f0',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 24,
-    justifyContent: 'center',
+    justifyContent: "center",
+    width: "90%",
+    height: "100%",
+    borderRadius: 5,
+    borderEndEndRadius : 0,
+    borderStartEndRadius : 0,
+    marginTop: 20,
+    elevation: 10,
+  },
+  titleContainer : {
+    borderBottomWidth : 1,
+    borderColor : "#cacaca",
+  },
+  settingContainer: {
+    flex: 1,
+  },
+  timeContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between", // Evenly space items
+    borderBottomWidth: 1,
+    borderColor : "#cacaca",
+  },
+  inputContainer: {
+    width: "45%", // Slightly less than 50% to account for margins
+    marginBottom: 16, // Space between rows
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
-    textAlign: 'center',
+    fontWeight: "700",
+    textAlign: "center",
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 20,
-    fontWeight: '600',
-    textAlign: 'center',
-    color: '#888',
-    marginBottom: 24,
+    fontWeight: "600",
+    color: "#888",
+    marginBottom: 15,
+    marginTop: 10,
   },
   label: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: 4,
-    color: '#333',
+    color: "#333",
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     padding: 10,
     borderRadius: 6,
     marginBottom: 16,
     fontSize: 16,
+    width: "80%",
+    height: 45,
+    margin: 5,
   },
   button: {
-    backgroundColor: '#222',
+    backgroundColor: "#222",
     paddingVertical: 14,
     borderRadius: 6,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
