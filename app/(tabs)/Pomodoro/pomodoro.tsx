@@ -4,7 +4,6 @@ import { View, Text, TouchableOpacity, StyleSheet, AppState } from "react-native
 import * as FileSystem from "expo-file-system";
 import { setting } from "@/interfaces";
 import { Ionicons } from "@expo/vector-icons";
-import { Storage } from 'expo-storage';
 
 const PomodoroTimer = () => {
   const [appState, setAppState] = useState(AppState.currentState);
@@ -62,7 +61,6 @@ const PomodoroTimer = () => {
     }
   }, [fileUri]);
 
-  // FIXME: only allow to run when press save
   useFocusEffect(
     useCallback(() => {
       loadSettings();

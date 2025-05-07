@@ -107,7 +107,7 @@ export default function App() {
 
     saveSettings(data);
     
-    router.back();
+    router.replace("/(tabs)/Pomodoro/pomodoro");
   };
 
   return (
