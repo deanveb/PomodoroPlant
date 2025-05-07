@@ -88,7 +88,7 @@ export default function App() {
     for (const [key, value] of Object.entries(setting)) {
       if (value !== "") {
         if (!parseInt(value)) {
-          setError(`${key} không hợp lệ(chỉ có thể ghi chữ số và các số lớn hơn 0)`);
+          setError(`${key} không hợp lệ(chỉ có thể ghi chữ số và các số phải lớn hơn 0)`);
           return;
         }
       } else {
@@ -115,16 +115,16 @@ export default function App() {
     <View style={styles.container}>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>
-              <Ionicons name="settings-outline" size={34} color="black" /> Settings
+              <Ionicons name="settings-outline" size={34} color="black" /> Cài Đặt
             </Text>
           </View>
     
           <ScrollView>
             <View style={styles.settingContainer}>
-              <Text style={styles.subtitle}>Time</Text>
+              <Text style={styles.subtitle}>Chỉnh thời gian</Text>
               <View style={styles.timeContainer}>
                 <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Work duration</Text>
+                  <Text style={styles.label}>Pomodoro</Text>
                   <TextInput
                     style={styles.input}
                     onChangeText={(text) => {
@@ -135,7 +135,7 @@ export default function App() {
                   />
                 </View>
                 <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Short break</Text>
+                  <Text style={styles.label}>Nghỉ ngắn</Text>
                   <TextInput
                     style={styles.input}
                     onChangeText={(text) => {
@@ -146,7 +146,7 @@ export default function App() {
                   />
                 </View>
                 <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Long break</Text>
+                  <Text style={styles.label}>Nghỉ dài</Text>
                   <TextInput
                     style={styles.input}
                     onChangeText={(text) => {
@@ -157,7 +157,7 @@ export default function App() {
                   />
                 </View>
                 <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Sessions</Text>
+                  <Text style={styles.label}>Kỳ</Text>
                   <TextInput
                     style={styles.input}
                     onChangeText={(text) => {
@@ -171,8 +171,9 @@ export default function App() {
             </View>
           </ScrollView>
           <View>
+            <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.button} onPress={handleSave}>
-              <Text style={styles.buttonText}>Save</Text>
+              <Text style={styles.buttonText}>Lưu</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -247,6 +248,9 @@ const styles = StyleSheet.create({
     width: "80%",
     height: 45,
     margin: 5,
+  },
+  errorText: {
+    color: 'red',
   },
   button: {
     backgroundColor: "#222",
