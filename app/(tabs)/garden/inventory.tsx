@@ -69,7 +69,7 @@ export default function InventoryScreen() {
   }, []);
 
   // Called every time the screen regains focus (e.g., switching tabs)
-  // Ensures the t  ree list is updated live
+  // Ensures the tree list is updated live
   useFocusEffect(
     useCallback(() => {
       loadFiles();
@@ -111,52 +111,52 @@ export default function InventoryScreen() {
       {error ? (
         <Text style={{ color: "red" }}>No tree here</Text>
       ) : (
-        <ScrollView>
-          {/* Display each tree as a selectable TreeDisplay component */}
-          {fileNames.map((name, index) => {
-            if (name.includes(".png")) {
-              return (
-                <TreeDisplay
-                  key={index}
-                  treeName={name}
-                  buttonName={buttonName}
-                  isDeleting={deleteMode}
-                  pushBeingDelete={(newTree) => {
-                    setSelectedDelete((s) => [...s, newTree]);
-                  }}
-                  removeBeingDelete={(Tree) => {
-                    setSelectedDelete((s) =>
-                      s.filter((item) => item != Tree)
-                    );
-                  }}
-                />
-              );
-            }
-          })}
-        </ScrollView>
-      //   <View style={styles.bagContainer}>
-      //   <Image source={require("@/assets/images/gardenBag1.png")} style={styles.bagBackground} />
+        // <ScrollView>
+        //   {/* Display each tree as a selectable TreeDisplay component */}
+        //   {fileNames.map((name, index) => {
+        //     if (name.includes(".png")) {
+        //       return (
+        //         <TreeDisplay
+        //           key={index}
+        //           treeName={name}
+        //           buttonName={buttonName}
+        //           isDeleting={deleteMode}
+        //           pushBeingDelete={(newTree) => {
+        //             setSelectedDelete((s) => [...s, newTree]);
+        //           }}
+        //           removeBeingDelete={(Tree) => {
+        //             setSelectedDelete((s) =>
+        //               s.filter((item) => item != Tree)
+        //             );
+        //           }}
+        //         />
+        //       );
+        //     }
+        //   })}
+        // </ScrollView>
+        <View style={styles.bagContainer}>
+        <Image source={require("@/assets/images/gardenBag1.png")} style={styles.bagBackground} />
         
-      //   <View style={styles.gridOverlay}>
-      //     {fileNames
-      //       .filter((name) => name.endsWith(".png"))
-      //       .slice(0, 12) // Limit to 3x4 = 12 items
-      //       .map((name, index) => (
-      //         <TreeDisplay
-      //           key={index}
-      //           treeName={name}
-      //           buttonName={buttonName}
-      //           isDeleting={deleteMode}
-      //           pushBeingDelete={(newTree) =>
-      //             setSelectedDelete((s) => [...s, newTree])
-      //           }
-      //           removeBeingDelete={(Tree) =>
-      //             setSelectedDelete((s) => s.filter((item) => item !== Tree))
-      //           }
-      //         />
-      //       ))}
-      //   </View>
-      // </View>
+        <View style={styles.gridOverlay}>
+          {fileNames
+            .filter((name) => name.endsWith(".png"))
+            .slice(0, 12) // Limit to 3x4 = 12 items
+            .map((name, index) => (
+              <TreeDisplay
+                key={index}
+                treeName={name}
+                buttonName={buttonName}
+                isDeleting={deleteMode}
+                pushBeingDelete={(newTree) =>
+                  setSelectedDelete((s) => [...s, newTree])
+                }
+                removeBeingDelete={(Tree) =>
+                  setSelectedDelete((s) => s.filter((item) => item !== Tree))
+                }
+              />
+            ))}
+        </View>
+      </View>
       )}
 
       {/* Button to remove tree from the current garden slot */}
@@ -280,6 +280,7 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     position: "absolute",
     zIndex: -1,
+    top: -50,
   },
 
   gridOverlay: {

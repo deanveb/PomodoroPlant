@@ -11,6 +11,7 @@ export default function Tab() {
   const router = useRouter();
   const [fileContent, setFileContent] = useState<TreeLayoutInfo>();
 
+  //file check
   useEffect(() => {
     const fileUri = FileSystem.documentDirectory + "treeLayout.json";
     const checkExist = async () => {
@@ -77,6 +78,7 @@ export default function Tab() {
         style={styles.backgroundImage}
         resizeMode="cover"
       />
+      
       <TouchableOpacity
         style={hasPotTree ? styles.treeContainer : styles.potContainer}
         onPress={() =>
