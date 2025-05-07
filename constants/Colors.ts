@@ -4,11 +4,7 @@
  */
 
 const tintColorLight = 'blue';
-<<<<<<< HEAD
-const tintColorDark = 'red';
-=======
 const tintColorDark = 'yellow';
->>>>>>> 2625594 (saving progress)
 
 export const Colors = {
   light: {
