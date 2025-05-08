@@ -11,12 +11,14 @@ import * as FileSystem from "expo-file-system";
 import { setting } from "@/interfaces";
 import { Ionicons } from "@expo/vector-icons";
 import { Storage } from "expo-storage";
+import { bootSave } from "@/interfaces";
 
 const PomodoroTimer = () => {
   const [appState, setAppState] = useState(AppState.currentState);
   // Timer states
   const [startTime, setStartTime] = useState(Date.now());
   const [mode, setMode] = useState<"work" | "break">("work");
+  const [breakMode, setBreakMode] = useState<"short" | "long">("short");
   const [timeLeft, setTimeLeft] = useState(3);
   const [isActive, setIsActive] = useState(false);
   const [fileContent, setFileContent] = useState<setting>();
@@ -38,8 +40,6 @@ const PomodoroTimer = () => {
     const checkExist = async () => {
       const fileExist = await FileSystem.getInfoAsync(fileUri);
       if (!fileExist.exists) {
-        console.log("no");
-
         try {
           await FileSystem.writeAsStringAsync(fileUri, "{}", {
             encoding: FileSystem.EncodingType.UTF8,
@@ -50,7 +50,21 @@ const PomodoroTimer = () => {
         }
       }
     };
+
+    const getBootSave = async () => {
+      // try {
+      //   // const item = await Storage.getItem({ key: "bootSave" })
+      //   // if (item !== null) {
+      //   //   const parsedItem = JSON.parse(item);
+      //   //   console.log(parsedItem);
+      //   // }
+      // } catch (error) {
+      //   // Handle invalid keys or read failures
+      // }   
+    };
+
     checkExist();
+    getBootSave();
   }, []);
 
   const loadSettings = useCallback(async () => {
@@ -118,8 +132,8 @@ const PomodoroTimer = () => {
       } else if (timeLeft === 0) {
         handleTimerEnd();
       }
-    }
-  }, [isActive, startTime, mode, timeLeft]);
+    }``
+  }, [isActive, startTime, timeLeft]);
 
   // FIXME: Timer jump ahead 15 sec when switching from inactive to active for a brief moment
   // TODO: Bring timer back to the state before turning off app
@@ -142,31 +156,51 @@ const PomodoroTimer = () => {
             setTimeLeft(currentTime.current);
             setStartTime(Date.now());
           }
+        } else {
+          // const saving : bootSave = {
+          //   status: mode,
+          //   breakStatus : breakMode,
+          //   time : currentTime.current,
+          //   start : startTime,
+          // };
+
+          // try {
+          //   // await Storage.setItem({
+          //   //   key: "bootSave",
+          //   //   value: JSON.stringify(saving),
+          //   // });
+          // } catch(e) {
+          //   console.error("while trying to bootSave: ", e);
+          // }
         }
         setAppState(nextAppState);
       });
     }
   }, [appState, startTime]);
 
+  const updateInterval = () => {
+    if (interval.current >= longBreakIntervalRef.current) {
+      breakDuration.current = longBreakDurationRef.current;
+      setBreakMode("long");
+      interval.current = 0;
+    } else {
+      breakDuration.current = shortBreakDurationRef.current;
+      setBreakMode("short");
+      interval.current++;
+    }
+  };
+
   const handleTimerEnd = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
 
-    // Switch mode
-    const nextMode = mode === "work" ? "break" : "work";
-    if (nextMode === "break") {
-      if (interval.current >= longBreakIntervalRef.current) {
-        breakDuration.current = longBreakDurationRef.current;
-        interval.current = 0;
-      } else {
-        breakDuration.current = shortBreakDurationRef.current;
-        interval.current++;
-      }
-      // TODO: Switch to in-app notification
+    switchMode(mode === "work" ? "break" : "work");
+    if ((mode === "work" ? "break" : "work") === "break") {
+      updateInterval();
+      // TODO: Switch to in-app notification (optional)
       router.push("/(tabs)/Pomodoro/treeReward");
     }
-    switchMode(nextMode);
   };
 
   const handleStartTimer = () => {
@@ -175,23 +209,33 @@ const PomodoroTimer = () => {
   };
 
   const handlePauseTimer = () => {
-    currentTime.current -= changeToSecond(Date.now() - startTime);
+    if (isActive) currentTime.current -= changeToSecond(Date.now() - startTime);
     setIsActive(false);
   };
+
+  useEffect(() => {
+    onModeChange();
+
+    function onModeChange() {
+      handleResetTimer();
+    }
+  }, [mode]);
 
   const handleResetTimer = () => {
     handlePauseTimer();
     setStartTime(Date.now());
-    setTimeLeft(
-      mode === "work" ? workDurationRef.current : breakDuration.current
-    );
-    currentTime.current =
-      mode === "work" ? workDurationRef.current : breakDuration.current;
+    const duration =
+      mode === "work"
+        ? workDurationRef.current
+        : breakMode === "short"
+        ? shortBreakDurationRef.current
+        : longBreakDurationRef.current;
+    setTimeLeft(duration);
+    currentTime.current = duration;
   };
 
   const switchMode = (newMode: "work" | "break") => {
     setMode(newMode);
-    handleResetTimer();  
   };
 
   const handleSkip = () => {
@@ -222,10 +266,36 @@ const PomodoroTimer = () => {
 
       <View style={styles.timerContainer}>
         <View style={styles.timerBoxContainer}>
+          <Text> #{interval.current} </Text>
           <View style={styles.modeContainer}>
-            <Text style={styles.modes}>Pomodoro</Text>
-            <Text style={styles.modes}>Break</Text>
-            <Text style={styles.modes}>Long Break</Text>
+            <Text
+              style={[
+                styles.modes,
+                mode === "work" ? { backgroundColor: "grey" } : {},
+              ]}
+            >
+              Pomodoro
+            </Text>
+            <Text
+              style={[
+                styles.modes,
+                mode === "break" && breakMode === "short"
+                  ? { backgroundColor: "grey" }
+                  : {},
+              ]}
+            >
+              Break
+            </Text>
+            <Text
+              style={[
+                styles.modes,
+                mode === "break" && breakMode === "long"
+                  ? { backgroundColor: "grey" }
+                  : {},
+              ]}
+            >
+              Long Break
+            </Text>
           </View>
           <View>
             <Text style={styles.timer}>{formatTime(timeLeft)}</Text>
@@ -247,7 +317,11 @@ const PomodoroTimer = () => {
             </TouchableOpacity>
             <TouchableOpacity onPress={handleSkip}>
               <Text style={styles.timerButtons}>
-                <Ionicons name="play-skip-forward-circle" size={34} color="black" />
+                <Ionicons
+                  name="play-skip-forward-circle"
+                  size={34}
+                  color="black"
+                />
               </Text>
             </TouchableOpacity>
           </View>

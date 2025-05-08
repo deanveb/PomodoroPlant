@@ -8,3 +8,10 @@ export interface setting {
 export interface TreeLayoutInfo {
   layout: Record<string, string>;
 }
+
+export interface bootSave {
+  status : string,
+  breakStatus : string,
+  time : number,
+  start : number,
+}

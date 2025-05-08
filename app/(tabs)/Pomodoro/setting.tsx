@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import * as FileSystem from "expo-file-system";
-import { View, Text, Switch, TextInput, StyleSheet, TouchableOpacity, ScrollView} from "react-native";
-import { router, useFocusEffect, useRouter } from "expo-router";
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView} from "react-native";
+import { useRouter } from "expo-router";
 import { setting } from "@/interfaces";
-import { useSharedValue } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 
 
@@ -58,6 +57,7 @@ export default function App() {
       setSetting(prev => ({...prev, work : String(fileContent.workDuration / 60)}));
       setSetting(prev => ({...prev, shortBreak : String(fileContent.shortBreakDuration / 60)}));
       setSetting(prev => ({...prev, longBreak : String(fileContent.longBreakDuration / 60)}));
+      setSetting(prev => ({...prev, session : String(fileContent.session)}));
     }
     // console.log("hi",fileContent.);
   }, [fileContent])
