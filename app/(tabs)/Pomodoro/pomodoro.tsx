@@ -1,9 +1,16 @@
 import { Link, router, useFocusEffect } from "expo-router";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, AppState } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  AppState,
+} from "react-native";
 import * as FileSystem from "expo-file-system";
 import { setting } from "@/interfaces";
 import { Ionicons } from "@expo/vector-icons";
+import { Storage } from "expo-storage";
 
 const PomodoroTimer = () => {
   const [appState, setAppState] = useState(AppState.currentState);
@@ -18,7 +25,6 @@ const PomodoroTimer = () => {
   const currentTime = useRef<number>(0);
 
   const fileUri = FileSystem.documentDirectory + "setting.json";
-  
 
   // Timer durations in seconds
   const workDurationRef = useRef(3);
@@ -76,7 +82,6 @@ const PomodoroTimer = () => {
         ? "shortBreak"
         : "longBreak";
 
-    // Update the refs with new values
     workDurationRef.current = fileContent.workDuration || 25 * 60;
     shortBreakDurationRef.current = fileContent.shortBreakDuration || 5 * 60;
     longBreakDurationRef.current = fileContent.longBreakDuration || 15 * 60;
@@ -87,31 +92,61 @@ const PomodoroTimer = () => {
         ? shortBreakDurationRef.current
         : longBreakDurationRef.current;
 
-    resetTimer();
+    handleResetTimer();
   }, [fileContent]);
 
-  const changeToSecond = (input : number) => {
-    return Math.max(0, Math.floor(input / 1000))
-  }
+  const changeToSecond = (input: number) => {
+    return Math.max(0, Math.floor(input / 1000));
+  };
 
-  // TODO: add a function to keep track of time when app is inactive
-  // Timer logic
   useEffect(() => {
-    if (isActive && timeLeft > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft(currentTime.current - (changeToSecond(Date.now() - startTime)));
-        // console.log(currentTime.current);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      handleTimerEnd();
-    }
+    timer();
 
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     };
-  }, [isActive, timeLeft]);
+
+    function timer() {
+      if (isActive && timeLeft > 0) {
+        timerRef.current = setInterval(() => {
+          setTimeLeft(
+            currentTime.current - changeToSecond(Date.now() - startTime)
+          );
+        }, 1000);
+      } else if (timeLeft === 0) {
+        handleTimerEnd();
+      }
+    }
+  }, [isActive, startTime, mode, timeLeft]);
+
+  // FIXME: Timer jump ahead 15 sec when switching from inactive to active for a brief moment
+  // TODO: Bring timer back to the state before turning off app
+  useEffect(() => {
+    const subscription = handleInactive();
+
+    return () => subscription.remove();
+
+    function handleInactive() {
+      return AppState.addEventListener("change", (nextAppState) => {
+        if (
+          appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          if (isActive) {
+            currentTime.current = Math.max(
+              0,
+              currentTime.current - changeToSecond(Date.now() - startTime)
+            );
+            setTimeLeft(currentTime.current);
+            setStartTime(Date.now());
+          }
+        }
+        setAppState(nextAppState);
+      });
+    }
+  }, [appState, startTime]);
 
   const handleTimerEnd = () => {
     if (timerRef.current) {
@@ -134,32 +169,33 @@ const PomodoroTimer = () => {
     switchMode(nextMode);
   };
 
-  const startTimer = () => {
+  const handleStartTimer = () => {
     setStartTime(Date.now());
     setIsActive(true);
   };
 
-  const pauseTimer = () => {
+  const handlePauseTimer = () => {
     currentTime.current -= changeToSecond(Date.now() - startTime);
     setIsActive(false);
   };
 
-  const resetTimer = () => {
-    pauseTimer();
+  const handleResetTimer = () => {
+    handlePauseTimer();
     setStartTime(Date.now());
     setTimeLeft(
       mode === "work" ? workDurationRef.current : breakDuration.current
     );
-    currentTime.current = mode === "work" ? workDurationRef.current : breakDuration.current;
+    currentTime.current =
+      mode === "work" ? workDurationRef.current : breakDuration.current;
   };
 
   const switchMode = (newMode: "work" | "break") => {
-    pauseTimer();
     setMode(newMode);
-    setTimeLeft(
-      newMode === "work" ? workDurationRef.current : breakDuration.current
-    );
-    currentTime.current = newMode === "work" ? workDurationRef.current : breakDuration.current;
+    handleResetTimer();  
+  };
+
+  const handleSkip = () => {
+    switchMode(mode === "work" ? "break" : "work");
   };
 
   // Format seconds to MM:SS
@@ -196,16 +232,23 @@ const PomodoroTimer = () => {
           </View>
           <View style={styles.timeButtonsContainer}>
             {!isActive ? (
-              <TouchableOpacity onPress={startTimer}>
+              <TouchableOpacity onPress={handleStartTimer}>
                 <Text style={styles.timerButtons}>Start</Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity onPress={pauseTimer}>
+              <TouchableOpacity onPress={handlePauseTimer}>
                 <Text style={styles.timerButtons}>Pause</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={resetTimer}>
-              <Text style={styles.timerButtons}><Ionicons name="refresh-circle" size={34} color="black" /></Text>
+            <TouchableOpacity onPress={handleResetTimer}>
+              <Text style={styles.timerButtons}>
+                <Ionicons name="refresh-circle" size={34} color="black" />
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleSkip}>
+              <Text style={styles.timerButtons}>
+                <Ionicons name="play-skip-forward-circle" size={34} color="black" />
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -234,10 +277,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#328E6E"
+    backgroundColor: "#328E6E",
   },
   timerBoxContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 10,
     borderRadius: 3,
   },
@@ -250,7 +293,7 @@ const styles = StyleSheet.create({
   },
   timeButtonsContainer: {
     flexDirection: "row",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   timerButtons: {
     margin: 10,
@@ -260,7 +303,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 33,
     fontWeight: "bold",
-  }
+  },
 });
 
 export default PomodoroTimer;

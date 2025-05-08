@@ -4,8 +4,7 @@ import { WebView, WebViewMessageEvent } from "react-native-webview";
 import * as FileSystem from "expo-file-system";
 import { htmlContent } from "../../../lib/htmlText";
 import { useRouter } from "expo-router";
-// No longer need MediaLibrary since we're saving to the app's files
-//
+
 export default function App() {
   const router = useRouter();
   const [message, setMessage] = useState("");
@@ -64,7 +63,7 @@ export default function App() {
       <View style={styles.buttonContainer}>
         <Button
           title="Back"
-          onPress={() => router.push("/(tabs)/Pomodoro/pomodoro")}
+          onPress={() => router.back()}
         />
         <Button
           title="Thêm cây vào túi"
