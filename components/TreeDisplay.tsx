@@ -38,7 +38,7 @@ export default function TreeDisplay({
       <Image
         source={{ uri: FileSystem.documentDirectory + "trees/" + treeName }}
         style={[
-          { width: 300, height: 300 },
+          { bottom: 0, width: 200, height: 200, borderRadius: 10, borderColor: "red", borderWidth: 10, overflow: "hidden", position: "relative" },
           isBeingDeleted ? { borderWidth: 3 } : { borderWidth: 0 },
         ]}
       />
