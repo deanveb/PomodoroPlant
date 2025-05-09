@@ -1,11 +1,11 @@
 import React, { useRef, useEffect, useState } from "react";
-import { View, Button, Alert, StyleSheet, Text } from "react-native";
+import { View, Image, Alert, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import * as FileSystem from "expo-file-system";
 import { htmlContent } from "../../../lib/htmlText";
 import { useRouter } from "expo-router";
-// No longer need MediaLibrary since we're saving to the app's files
-//
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+
 export default function App() {
   const router = useRouter();
   const [message, setMessage] = useState("");
@@ -38,7 +38,7 @@ export default function App() {
       await handleCreateFolder();
 
       // Save to app's document directory instead of the gallery
-      const fileName = `canvas-image-${new Date().getTime()}.png`;
+      const fileName = `canvas-image-${new Date().getTime()}.jpeg`;
       const fileUri = FileSystem.documentDirectory + "trees/" + fileName;
 
       await FileSystem.writeAsStringAsync(fileUri, base64, {
@@ -52,26 +52,32 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <WebView
-        ref={webviewRef}
-        originWhitelist={["*"]}
-        source={{ html: htmlContent }}
-        onMessage={handleMessage}
-        style={styles.webview}
-        javaScriptEnabled={true}
-      />
-      {message ?? <Text>Error: {message}</Text>}
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Back"
-          onPress={() => router.push("/(tabs)/Pomodoro/pomodoro")}
+      <View style={styles.webview}>
+        <WebView
+          ref={webviewRef}
+          originWhitelist={["*"]}
+          source={{ html: htmlContent }}
+          onMessage={handleMessage}
+          javaScriptEnabled={true}
         />
-        <Button
-          title="Thêm cây vào túi"
-          onPress={() => {
-            webviewRef.current?.injectJavaScript("saveCanvasImage(); true;");
-          }}
-        />
+      </View>
+        {/* {message ? <Text>Error: {message}</Text> : null} */}
+        <MaterialIcons name="pinch" size={40}/>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.button}
+          >
+            <Ionicons name="arrow-back-outline" size={34} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              webviewRef.current?.injectJavaScript("saveCanvasImage(); true;");
+            }}
+          >
+            <Ionicons name="save" size={34} color="white" />
+          </TouchableOpacity>
       </View>
     </View>
   );
@@ -80,15 +86,28 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#50a385",
+    alignItems: "center",
+    justifyContent: "center",
   },
   webview: {
-    flex: 1,
+    width: 350,
+    height: 350,
+    borderRadius: 250,
+    backgroundColor: "#e4e5a3",
+    overflow: "scroll",
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     padding: 10,
-    backgroundColor: "#f0f0f0",
+    margin: 19,
+  },
+  button: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth : 1,
+    borderColor: 'white',
+    borderRadius : 2,
+    margin: 25,
   },
 });
