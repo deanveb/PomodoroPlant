@@ -181,6 +181,7 @@ export default function App() {
   )
 }
 
+// FIXME: Cài đặt bị lệch với icon
 const styles = StyleSheet.create({
   backgroundContainer: {
     flex: 1,
