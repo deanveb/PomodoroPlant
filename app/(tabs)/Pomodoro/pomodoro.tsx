@@ -115,26 +115,22 @@ const PomodoroTimer = () => {
   };
 
   useEffect(() => {
-    timer();
+    if (isActive && timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(
+          currentTime.current - changeToSecond(Date.now() - startTime)
+        );
+      }, 1000);
+    } else if (timeLeft === 0) {
+      handleTimerEnd();
+    }
 
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     };
-
-    function timer() {
-      if (isActive && timeLeft > 0) {
-        timerRef.current = setInterval(() => {
-          setTimeLeft(
-            currentTime.current - changeToSecond(Date.now() - startTime)
-          );
-        }, 1000);
-      } else if (timeLeft === 0) {
-        handleTimerEnd();
-      }
-    }``
-  }, [isActive, startTime, timeLeft]);
+  }, [isActive, startTime, currentTime.current]);
 
   // FIXME: Timer jump ahead 15 sec when switching from inactive to active for a brief moment
   // TODO: Bring timer back to the state before turning off app
