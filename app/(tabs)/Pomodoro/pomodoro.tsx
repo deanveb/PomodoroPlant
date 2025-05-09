@@ -188,6 +188,11 @@ const PomodoroTimer = () => {
   }, [mode]);
 
   const handleResetTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
     handlePauseTimer();
     setStartTime(Date.now());
     const duration =
