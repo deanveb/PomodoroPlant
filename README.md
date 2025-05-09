@@ -1,96 +1,105 @@
-# Welcome to your Expo app 👋
+# Chào Mừng Đến Với PomodoroPlant 🌳
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**PomodoroPlant** là ứng dụng kết hợp giữa kỹ thuật Pomodoro và mô hình trồng cây ảo giúp bạn duy trì sự tập trung và xây dựng thói quen làm việc hiệu quả. Mỗi phiên làm việc 25 phút giúp bạn “trồng” một cái cây. Càng kiên trì, khu vườn của bạn càng xanh tốt. Giao diện đơn giản, dễ dùng, tạo động lực tập trung mà không gây áp lực.
 
-## Get started
+## Mô Tả ✍️
 
-1. Install dependencies
+**PomodoroPlant** – Làm việc tập trung, gieo mầm thói quen tốt
 
-   ```bash
-   npm install
-   ```
+**PomodoroPlant** là ứng dụng hỗ trợ quản lý thời gian bằng phương pháp Pomodoro: chia thời gian làm việc thành các phiên 25 phút tập trung, xen kẽ với nghỉ ngắn. Điểm đặc biệt của ứng dụng là tính năng “trồng cây” tương tự như app Forest – mỗi phiên làm việc thành công sẽ giúp bạn trồng một cây mới vào khu vườn ảo của mình, từ đó tạo động lực duy trì sự tập trung.
 
-2. Start the app
+**PomodoroPlant** hướng đến học sinh, sinh viên, freelancer và những người làm việc cần duy trì sự tập trung cao. Thay vì chỉ là hẹn giờ, ứng dụng giúp bạn biến việc tập trung thành một hành trình có phần thưởng – một khu vườn nhỏ do chính bạn tạo ra.
 
-   ```bash
-    npx expo start
-   ```
+## Tính Năng 🔧
 
-In the output, you'll find options to open the app in a
+Tính năng chính:
+	
+•	**Hẹn giờ Pomodoro linh hoạt**: Tùy chỉnh thời gian làm việc, nghỉ ngắn và nghỉ dài theo nhu cầu cá nhân.
+	
+•	**Trồng cây khi hoàn thành phiên làm việc**: Mỗi cây tượng trưng cho một phiên Pomodoro thành công.
+	
+•	**Khu vườn ảo phản ánh năng suất**: Càng tập trung, khu vườn càng phong phú – bạn sẽ thấy được thành quả qua hình ảnh trực quan.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Thông Tin Thêm ℹ
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Dependencies
 
-## Get a fresh project
+### **Phụ Thuộc (Dependencies)**
 
-When you're ready, run:
+Dự án yêu cầu các thư viện sau:
+
+| Thư viện                                       | Phiên bản   |
+|------------------------------------------------|-------------|
+| **@expo/vector-icons**                         | ^14.0.2     |
+| **@react-navigation/bottom-tabs**              | ^7.2.0      |
+| **@react-navigation/native**                   | ^7.0.14     |
+| **canvas**                                     | ^2.11.2     |
+| **expo**                                       | ~52.0.46    |
+| **expo-blur**                                  | ~14.0.3     |
+| **expo-constants**                             | ~17.0.8     |
+| **expo-dev-client**                            | ~5.0.20     |
+| **expo-file-system**                           | ~18.0.12    |
+| **expo-font**                                  | ~13.0.4     |
+| **expo-haptics**                               | ~14.0.1     |
+| **expo-linking**                               | ~7.0.5      |
+| **expo-media-library**                         | ~17.0.6     |
+| **expo-router**                                | ~4.0.20     |
+| **expo-splash-screen**                         | ~0.29.24    |
+| **expo-status-bar**                            | ~2.0.1      |
+| **expo-symbols**                               | ~0.2.2      |
+| **expo-system-ui**                             | ~4.0.9      |
+| **expo-web-browser**                           | ~14.0.2     |
+| **node-p5**                                    | ^1.0.4      |
+| **p5**                                         | ^2.0.1      |
+| **pureimage**                                  | ^0.4.18     |
+| **react**                                      | 18.3.1      |
+| **react-dom**                                  | 18.3.1      |
+| **react-native**                               | 0.76.9      |
+| **react-native-gesture-handler**               | ~2.20.2     |
+| **react-native-reanimated**                    | ~3.16.1     |
+| **react-native-safe-area-context**             | 4.12.0      |
+| **react-native-screens**                       | ~4.4.0      |
+| **react-native-web**                           | ~0.19.13    |
+| **react-native-webview**                       | 13.12.5     |
+| **@react-native-async-storage/async-storage**   | 1.23.1      |
+| **expo-checkbox**                              | ~4.0.1      |
+| **expo-image**                                 | ~2.0.7      |
+
+Cài đặt các phụ thuộc:
 
 ```bash
-npm run reset-project
+npm install
 ```
+### Cài Đặt
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Khởi Chạy Chương Trình
 
-## Learn more
+## Trợ Giúp
 
-To learn more about developing your project with Expo, look at the following resources:
+## Tác Giả
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+ex. [Tên]
+ex. [Tên]
+ex. [Tên]
+ex. [Tên]
+ex. [Tên]
 
-## Join the community
+## Các Phiên Bản 🖥️
 
-Join our community of developers creating universal apps.
+* 0.1
+    * Phiên bản phát hành
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Chính Sách
 
+* Chính sách
 
-A short and clean step-by-step guide to go from a fresh local folder to committing and pushing to a specific branch on GitHub:
-✅ 1. Go to your project folder
+## Lời Tri Ân 🍃
 
-cd /path/to/your/project
+Nguồn cảm hứng:
+* [Forest](https://www.forestapp.cc/)
+* [Thuật Toán Mọc Cây](https://youtube.com/@barneycodes?si=zBy_aK2PSYYK2E2u)
 
-✅ 2. Initialize Git
-
-git init
-
-✅ 3. Connect to GitHub repo
-
-git remote add origin https://github.com/yourusername/your-repo.git
-
-✅ 4. Checkout the branch you want to work on
-
-If the branch already exists on GitHub:
-
-git fetch origin
-git checkout -b branch-name origin/branch-name
-
-If you want to create a new branch:
-
-git checkout -b new-branch-name
-
-✅ 5. Track the branch (only needed once)
-
-git push -u origin branch-name
-
-📝 6. Make changes → Stage → Commit
-
-git add .
-git commit -m "Your commit message"
-
-🚀 7. Push your changes
-
-git push
-
-🔁 8. After this, for future work
-
-You only need:
-
-git add .
-git commit -m "Message"
-git push
+Cùng với sự hỗ trợ từ:
+* DeepSeek
+* ChatGPT
+* Copilot
