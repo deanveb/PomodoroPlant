@@ -48,3 +48,49 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+
+A short and clean step-by-step guide to go from a fresh local folder to committing and pushing to a specific branch on GitHub:
+✅ 1. Go to your project folder
+
+cd /path/to/your/project
+
+✅ 2. Initialize Git
+
+git init
+
+✅ 3. Connect to GitHub repo
+
+git remote add origin https://github.com/yourusername/your-repo.git
+
+✅ 4. Checkout the branch you want to work on
+
+If the branch already exists on GitHub:
+
+git fetch origin
+git checkout -b branch-name origin/branch-name
+
+If you want to create a new branch:
+
+git checkout -b new-branch-name
+
+✅ 5. Track the branch (only needed once)
+
+git push -u origin branch-name
+
+📝 6. Make changes → Stage → Commit
+
+git add .
+git commit -m "Your commit message"
+
+🚀 7. Push your changes
+
+git push
+
+🔁 8. After this, for future work
+
+You only need:
+
+git add .
+git commit -m "Message"
+git push
