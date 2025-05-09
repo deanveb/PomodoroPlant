@@ -11,8 +11,6 @@ import {
 import * as FileSystem from "expo-file-system";
 import { setting } from "@/interfaces";
 import { Ionicons } from "@expo/vector-icons";
-import { Storage } from "expo-storage";
-import { bootSave } from "@/interfaces";
 
 const PomodoroTimer = () => {
   const [appState, setAppState] = useState(AppState.currentState);
@@ -52,20 +50,7 @@ const PomodoroTimer = () => {
       }
     };
 
-    const getBootSave = async () => {
-      // try {
-      //   // const item = await Storage.getItem({ key: "bootSave" })
-      //   // if (item !== null) {
-      //   //   const parsedItem = JSON.parse(item);
-      //   //   console.log(parsedItem);
-      //   // }
-      // } catch (error) {
-      //   // Handle invalid keys or read failures
-      // }   
-    };
-
     checkExist();
-    getBootSave();
   }, []);
 
   const loadSettings = useCallback(async () => {
@@ -154,24 +139,7 @@ const PomodoroTimer = () => {
             setTimeLeft(currentTime.current);
             setStartTime(Date.now());
           }
-        } else {
-          // const saving : bootSave = {
-          //   status: mode,
-          //   breakStatus : breakMode,
-          //   time : currentTime.current,
-          //   start : startTime,
-          // };
-
-          // try {
-          //   // await Storage.setItem({
-          //   //   key: "bootSave",
-          //   //   value: JSON.stringify(saving),
-          //   // });
-          // } catch(e) {
-          //   console.error("while trying to bootSave: ", e);
-          // }
-        }
-        setAppState(nextAppState);
+        } setAppState(nextAppState);
       });
     }
   }, [appState, startTime]);
