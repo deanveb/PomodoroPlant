@@ -78,20 +78,14 @@ npm install
 
 ## Tác Giả
 
-ex. [Tên]
-ex. [Tên]
-ex. [Tên]
-ex. [Tên]
-ex. [Tên]
+[Trần Chí An](https://github.com/deanveb)
+
+
 
 ## Các Phiên Bản 🖥️
 
-* 0.1
+* 1.0
     * Phiên bản phát hành
-
-## Chính Sách
-
-* Chính sách
 
 ## Lời Tri Ân 🍃
 
