@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   AppState,
+  Image,
 } from "react-native";
 import * as FileSystem from "expo-file-system";
 import { setting } from "@/interfaces";
@@ -149,6 +150,8 @@ const PomodoroTimer = () => {
           nextAppState === "active"
         ) {
           if (isActive) {
+            // console.log("hi");
+            
             currentTime.current = Math.max(
               0,
               currentTime.current - changeToSecond(Date.now() - startTime)
@@ -268,59 +271,51 @@ const PomodoroTimer = () => {
         <View style={styles.timerBoxContainer}>
           <Text> #{interval.current} </Text>
           <View style={styles.modeContainer}>
-            <Text
+            {
+              mode === "work" ?
+              <Text
               style={[
                 styles.modes,
-                mode === "work" ? { backgroundColor: "grey" } : {},
               ]}
             >
               Pomodoro
             </Text>
-            <Text
-              style={[
-                styles.modes,
-                mode === "break" && breakMode === "short"
-                  ? { backgroundColor: "grey" }
-                  : {},
-              ]}
-            >
-              Break
-            </Text>
-            <Text
-              style={[
-                styles.modes,
-                mode === "break" && breakMode === "long"
-                  ? { backgroundColor: "grey" }
-                  : {},
-              ]}
-            >
-              Long Break
-            </Text>
+            : breakMode === "short" ? 
+            <Text style={styles.modes}>Short Break</Text>
+            : <Text style={styles.modes}>Long Break</Text>
+            }
           </View>
           <View>
-            <Text style={styles.timer}>{formatTime(timeLeft)}</Text>
+            <Text style={styles.timer}>
+              {formatTime(timeLeft).slice(0, 2) + '\n'}
+              {formatTime(timeLeft).slice(3, 5)}
+            </Text>
           </View>
           <View style={styles.timeButtonsContainer}>
+            <TouchableOpacity onPress={handleResetTimer}>
+              <Text style={styles.timerButtons}>
+                <Ionicons name="refresh-circle" size={34} color="b87de9" />
+              </Text>
+            </TouchableOpacity>
             {!isActive ? (
               <TouchableOpacity onPress={handleStartTimer}>
-                <Text style={styles.timerButtons}>Start</Text>
+                <Text style={styles.timerButtons}>
+                  <Ionicons name="play-circle" size={34} color="b87de9"/>
+                </Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={handlePauseTimer}>
-                <Text style={styles.timerButtons}>Pause</Text>
+                <Text style={styles.timerButtons}>
+                  <Ionicons name="pause-circle" size={34} color="b87de9"/>
+                </Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={handleResetTimer}>
-              <Text style={styles.timerButtons}>
-                <Ionicons name="refresh-circle" size={34} color="black" />
-              </Text>
-            </TouchableOpacity>
             <TouchableOpacity onPress={handleSkip}>
               <Text style={styles.timerButtons}>
                 <Ionicons
                   name="play-skip-forward-circle"
                   size={34}
-                  color="black"
+                  color="b87de9"
                 />
               </Text>
             </TouchableOpacity>
@@ -334,12 +329,17 @@ const PomodoroTimer = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#E8F5F9", // Soft green background
   },
   navBar: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderColor: "#C8E6C9",
   },
   logoContainer: {
     flex: 1,
@@ -351,33 +351,54 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#328E6E",
+    backgroundColor: "#E8F5E9",
   },
   timerBoxContainer: {
-    backgroundColor: "white",
-    padding: 10,
-    borderRadius: 3,
+    backgroundColor: "#ffffff",
+    padding: 20,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 5,
+    alignItems: "center",
+    width: 300,
   },
   modeContainer: {
     flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 10,
+    width: "100%",
   },
   modes: {
-    margin: 6,
-    fontSize: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: "#C8E6C9",
+    color: "#2E7D32",
+    fontSize: 16,
+    fontWeight: "600",
+    overflow: "hidden",
   },
   timeButtonsContainer: {
     flexDirection: "row",
     justifyContent: "center",
+    marginTop: 20,
   },
   timerButtons: {
-    margin: 10,
-    fontSize: 22,
+    marginHorizontal: 15,
+    fontSize: 20,
+    color: "#388E3C",
   },
   timer: {
     textAlign: "center",
-    fontSize: 33,
+    fontSize: 60,
     fontWeight: "bold",
+    color: "#2E7D32",
+    marginVertical: 10,
   },
 });
+
 
 export default PomodoroTimer;

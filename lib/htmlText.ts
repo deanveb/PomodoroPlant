@@ -11,8 +11,8 @@ export const htmlContent = `
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
+            width: 500px;
+            height: 500px;
           }
           canvas {
             display: block;

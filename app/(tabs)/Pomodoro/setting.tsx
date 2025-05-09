@@ -115,7 +115,7 @@ export default function App() {
     <View style={styles.container}>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>
-              <Ionicons name="settings-outline" size={34} color="black" /> Cài Đặt
+              <Ionicons name="settings-outline" size={34} color="#4B5320" /> Cài Đặt
             </Text>
           </View>
     
@@ -185,25 +185,31 @@ const styles = StyleSheet.create({
   backgroundContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center', 
-    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    backgroundColor: '#F9FAF3', // Light neutral background
   },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     padding: 24,
     justifyContent: "center",
     width: "90%",
     height: "100%",
-    borderRadius: 5,
-    borderEndEndRadius : 0,
-    borderStartEndRadius : 0,
+    borderRadius: 16,
     marginTop: 20,
-    elevation: 10,
+    elevation: 5,
+    shadowColor: "#7D9445", // Olive green shadow
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: "#CEDDA5", // Muted green border
   },
-  titleContainer : {
-    borderBottomWidth : 1,
-    borderColor : "#cacaca",
+  titleContainer: {
+    borderBottomWidth: 1.5,
+    borderColor: "#B6CF8E", // Sage accent
+    paddingBottom: 12,
+    marginBottom: 16,
   },
   settingContainer: {
     flex: 1,
@@ -211,57 +217,64 @@ const styles = StyleSheet.create({
   timeContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between", // Evenly space items
-    borderBottomWidth: 1,
-    borderColor : "#cacaca",
+    justifyContent: "space-between",
+    borderBottomWidth: 1.5,
+    borderColor: "#DDEB9D", // Main green-yellow
+    paddingBottom: 16,
   },
   inputContainer: {
-    width: "45%", // Slightly less than 50% to account for margins
-    marginBottom: 16, // Space between rows
+    width: "45%",
+    marginBottom: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: "700",
     textAlign: "center",
-    marginBottom: 12,
+    color: "#4B5320", // Army green
   },
   subtitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#888",
+    color: "#7D9445", // Olive green
     marginBottom: 15,
     marginTop: 10,
   },
   label: {
     fontSize: 14,
     fontWeight: "500",
-    marginBottom: 4,
-    color: "#333",
+    marginBottom: 6,
+    color: "#4B5320", // Army green
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: "#B6CF8E", // Sage green
+    padding: 12,
+    borderRadius: 10,
     marginBottom: 16,
     fontSize: 16,
     width: "80%",
-    height: 45,
+    height: 48,
     margin: 5,
+    backgroundColor: "#F9FAF3", // Soft background
   },
   errorText: {
-    color: 'red',
+    color: '#C86B6B', // Earthy red
+    textAlign: 'center',
+    marginBottom: 8,
+    fontSize: 14,
   },
   button: {
-    backgroundColor: "#222",
-    paddingVertical: 14,
-    borderRadius: 6,
+    backgroundColor: "#7D9445", // Olive green
+    paddingVertical: 16,
+    borderRadius: 10,
     alignItems: "center",
     marginTop: 8,
+    elevation: 3,
   },
   buttonText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
+    letterSpacing: 0.5,
   },
 });

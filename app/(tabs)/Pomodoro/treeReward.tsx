@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
-import { View, Button, Alert, StyleSheet, Text } from "react-native";
+import { View, Button, Alert, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import * as FileSystem from "expo-file-system";
 import { htmlContent } from "../../../lib/htmlText";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function App() {
   const router = useRouter();
@@ -51,26 +52,31 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <WebView
-        ref={webviewRef}
-        originWhitelist={["*"]}
-        source={{ html: htmlContent }}
-        onMessage={handleMessage}
-        style={styles.webview}
-        javaScriptEnabled={true}
-      />
-      {message ?? <Text>Error: {message}</Text>}
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Back"
-          onPress={() => router.back()}
+      <View style={styles.webview}>
+        <WebView
+          ref={webviewRef}
+          originWhitelist={["*"]}
+          source={{ html: htmlContent }}
+          onMessage={handleMessage}
+          javaScriptEnabled={true}
         />
-        <Button
-          title="Thêm cây vào túi"
+      </View>
+      {/* {message ? <Text>Error: {message}</Text> : null} */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.button}
+        >
+          <Ionicons name="arrow-back-outline" size={34} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => {
             webviewRef.current?.injectJavaScript("saveCanvasImage(); true;");
           }}
-        />
+        >
+          <Ionicons name="save" size={34} color="white" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -79,15 +85,27 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#50a385",
+    alignItems: "center",
+    justifyContent: "center",
   },
   webview: {
-    flex: 1,
+    width: 350,
+    height: 350,
+    borderRadius: 250,
+    backgroundColor: "#e4e5a3",
+    overflow: "scroll",
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     padding: 10,
-    backgroundColor: "#f0f0f0",
+    margin: 19,
+  },
+  button: {
+    borderWidth : 1,
+    borderColor: 'white',
+    borderRadius : 2,
+    margin: 25,
   },
 });
