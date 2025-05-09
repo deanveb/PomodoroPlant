@@ -1,10 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
-import { View, Button, Alert, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { View, Image, Alert, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import * as FileSystem from "expo-file-system";
 import { htmlContent } from "../../../lib/htmlText";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 export default function App() {
   const router = useRouter();
@@ -61,22 +61,23 @@ export default function App() {
           javaScriptEnabled={true}
         />
       </View>
-      {/* {message ? <Text>Error: {message}</Text> : null} */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.button}
-        >
-          <Ionicons name="arrow-back-outline" size={34} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            webviewRef.current?.injectJavaScript("saveCanvasImage(); true;");
-          }}
-        >
-          <Ionicons name="save" size={34} color="white" />
-        </TouchableOpacity>
+        {/* {message ? <Text>Error: {message}</Text> : null} */}
+        <MaterialIcons name="pinch" size={40}/>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.button}
+          >
+            <Ionicons name="arrow-back-outline" size={34} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              webviewRef.current?.injectJavaScript("saveCanvasImage(); true;");
+            }}
+          >
+            <Ionicons name="save" size={34} color="white" />
+          </TouchableOpacity>
       </View>
     </View>
   );
@@ -103,6 +104,7 @@ const styles = StyleSheet.create({
     margin: 19,
   },
   button: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderWidth : 1,
     borderColor: 'white',
     borderRadius : 2,

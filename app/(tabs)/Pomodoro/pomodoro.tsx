@@ -258,7 +258,7 @@ const PomodoroTimer = () => {
     <View style={styles.container}>
       <View style={styles.navBar}>
         <View style={styles.logoContainer}>
-          <Text>Pomodoro Plant</Text>
+          <Text style={styles.logoText}><Ionicons name="leaf" size={20} color="b87de9" />Pomodoro Plant</Text>
         </View>
         <View style={styles.navButtonsContainer}>
           <Link href={"/(tabs)/Pomodoro/setting"}>
@@ -326,6 +326,8 @@ const PomodoroTimer = () => {
   );
 };
 
+
+// FIXME: add a grassy background to container
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -337,12 +339,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: "white",
+    backgroundColor: "#A0C878",
     borderBottomWidth: 1,
     borderColor: "#C8E6C9",
   },
   logoContainer: {
     flex: 1,
+  },
+  logoText: {
+    fontWeight: "bold",
   },
   navButtonsContainer: {
     flexDirection: "row",
