@@ -1,13 +1,11 @@
 import { Stack } from 'expo-router';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-
 
 export default function GardenLayout() {
   return (
-    <Stack screenOptions={{headerShown:false}}>
-      <Stack.Screen name='pomodoro'/>
-      <Stack.Screen name='treeReward'/>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="pomodoro" />
+      <Stack.Screen name="setting" options={{ presentation: "modal" }} />
+      <Stack.Screen name="treeReward" options={{ presentation: "modal" }} />
     </Stack>
   );
 }
