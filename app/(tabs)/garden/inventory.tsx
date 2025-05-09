@@ -1,7 +1,8 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ImageBackground } from "react-native";
 import * as FileSystem from "expo-file-system";
-import { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useState, useCallback } from "react";
 
 import TreeDisplay from "@/components/TreeDisplay";
 import useChoose from "@/hooks/useChoose";
@@ -38,10 +39,13 @@ export default function InventoryScreen() {
     }
   };
 
-  useEffect(() => {
-    checkFileExistence();
-    loadFiles();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      checkFileExistence();
+      loadFiles();
+    }, [])
+  );
+  
 
   const handleDelete = () => {
     setDeleteMode(false);
