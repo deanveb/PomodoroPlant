@@ -38,7 +38,7 @@ export default function App() {
       await handleCreateFolder();
 
       // Save to app's document directory instead of the gallery
-      const fileName = `canvas-image-${new Date().getTime()}.png`;
+      const fileName = `canvas-image-${new Date().getTime()}.jpeg`;
       const fileUri = FileSystem.documentDirectory + "trees/" + fileName;
 
       await FileSystem.writeAsStringAsync(fileUri, base64, {

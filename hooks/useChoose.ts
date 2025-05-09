@@ -67,6 +67,6 @@ export default function useChoose() {
     };
     storeData(layoutData);
 
-    router.push("/(tabs)/garden");
+    router.replace("/(tabs)/garden");
   };
 }
