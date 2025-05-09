@@ -32,8 +32,6 @@ export default function InventoryScreen() {
   };
 
   useEffect(() => {
-    console.log(buttonName);
-
     loadFiles();
   }, []);
 
@@ -74,7 +72,7 @@ export default function InventoryScreen() {
       ) : (
         <ScrollView>
           {fileNames.map((name, index) => {
-            if (name.includes(".png")) {
+            if (name.includes(".jpeg")) {
               return (
                 <>
                   <TreeDisplay

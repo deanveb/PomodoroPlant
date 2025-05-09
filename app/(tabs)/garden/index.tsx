@@ -1,12 +1,29 @@
-import { useRouter } from "expo-router";
-import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { View, StyleSheet, Image, TouchableOpacity, ImageResizeMode } from "react-native";
 import * as FileSystem from "expo-file-system";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TreeLayoutInfo } from "@/interfaces";
 
 export default function Tab() {
   const router = useRouter();
   const [fileContent, setFileContent] = useState<TreeLayoutInfo>();
+  const [resizeFix, setResizeFix] = useState<ImageResizeMode>("contain");
+  const resized = useRef<number>(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (resized.current == 2) {
+        resized.current = 0;
+        return;
+      }
+      const alternateResizeMode = () => {
+        setResizeFix(prev => prev === "contain" ? "cover" : "contain");
+        resized.current++;
+      }
+
+      alternateResizeMode();
+    }, [resizeFix])
+  );
 
   useEffect(() => {
     const fileUri = FileSystem.documentDirectory + "treeLayout.json";
@@ -32,7 +49,6 @@ export default function Tab() {
         });
 
         const jsonData = JSON.parse(fileContent) as TreeLayoutInfo;
-        console.log("File content:", jsonData);
         setFileContent(jsonData);
       } catch (e) {
         console.error("Error reading file content: ", e);
@@ -73,7 +89,6 @@ export default function Tab() {
       <Image
         source={require("@/assets/images/background.png")}
         style={styles.backgroundImage}
-        resizeMode="cover"
       />
       <TouchableOpacity
         style={hasPotTree ? styles.treeContainer : styles.potContainer}
@@ -90,7 +105,7 @@ export default function Tab() {
               uri: FileSystem.documentDirectory + "trees/" + layoutData["pot"],
             }}
             style={styles.tree}
-            resizeMode="contain"
+            resizeMode={resizeFix}
           />
         ) : (
           <Image

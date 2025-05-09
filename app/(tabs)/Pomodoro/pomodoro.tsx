@@ -97,7 +97,7 @@ const PomodoroTimer = () => {
         ? "shortBreak"
         : "longBreak";
 
-    workDurationRef.current = fileContent.workDuration || 25 * 60;
+    workDurationRef.current = fileContent.workDuration / 60 || 25 * 60;
     shortBreakDurationRef.current = fileContent.shortBreakDuration || 5 * 60;
     longBreakDurationRef.current = fileContent.longBreakDuration || 15 * 60;
     longBreakIntervalRef.current = fileContent.session || 4;
