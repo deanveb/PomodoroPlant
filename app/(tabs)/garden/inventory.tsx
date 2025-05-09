@@ -1,295 +1,239 @@
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { View, StyleSheet, Image, TouchableOpacity, Text, Button, ScrollView } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ImageBackground } from "react-native";
 import * as FileSystem from "expo-file-system";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import TreeDisplay from "@/components/TreeDisplay";
 import useChoose from "@/hooks/useChoose";
 
-// Interface for layout JSON structure
-interface TreeLayoutInfo {
-  layout: Record<string, string>;
-}
-
 export default function InventoryScreen() {
   const router = useRouter();
-
-  // State to store contents of layout JSON
-  const [fileContent, setFileContent] = useState<TreeLayoutInfo>();
-
-  // State to store all tree filenames (images)
-  const [fileNames, setFileNames] = useState<string[]>([]);
-
-  // State for error handling
-  const [error, setError] = useState<string | null>(null);
-
-  // State for toggling delete mode
-  const [deleteMode, setDeleteMode] = useState(false);
-
-  // State to track which trees are selected to be deleted
-  const [selectedDelete, setSelectedDelete] = useState<string[]>([]);
-
-  // Custom hook to handle tree selection logic
   const handleChoose = useChoose();
 
-  // Get current slot name from navigation parameters
   const { name } = useLocalSearchParams();
   const buttonName = name as string;
 
-  // Path to tree layout JSON file
+  const [fileNames, setFileNames] = useState<string[]>([]);
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [selectedDelete, setSelectedDelete] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
   const fileUri = FileSystem.documentDirectory + "treeLayout.json";
 
-  // Checks if treeLayout.json exists, creates it with default data if not
   const checkFileExistence = async () => {
     const fileExist = await FileSystem.getInfoAsync(fileUri);
     if (!fileExist.exists) {
-      const defaultData = {
-        layout: { pot: "", tree1: "", tree2: "" }, // Initial empty layout
-      };
+      const defaultData = { layout: { pot: "", tree1: "", tree2: "" } };
       await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(defaultData));
     }
   };
 
-  // Loads all .png files (trees) from the 'trees' directory
   const loadFiles = async () => {
     try {
       const fileDirectory = FileSystem.documentDirectory + "trees/";
       const files = await FileSystem.readDirectoryAsync(fileDirectory);
-      setFileNames(files); // Updates state with tree image filenames
+      setFileNames(files);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");
     }
   };
 
-  // Called once when the component mounts
   useEffect(() => {
-    console.log(buttonName); // Logs which slot is being edited (e.g., "pot")
-    checkFileExistence();    // Ensure layout file exists
-    loadFiles();             // Load tree images
+    checkFileExistence();
+    loadFiles();
   }, []);
 
-  // Called every time the screen regains focus (e.g., switching tabs)
-  // Ensures the tree list is updated live
-  useFocusEffect(
-    useCallback(() => {
-      loadFiles();
-    }, [])
-  );
-
-  // Deletes all selected trees from the file system
   const handleDelete = () => {
-    setDeleteMode(false); // Exit delete mode
-
-    const fileUri = FileSystem.documentDirectory + "trees/";
+    setDeleteMode(false);
+    const fileDirectory = FileSystem.documentDirectory + "trees/";
     selectedDelete.forEach(async (tree) => {
       try {
-        await FileSystem.deleteAsync(fileUri + tree); // Delete each selected tree
+        await FileSystem.deleteAsync(fileDirectory + tree);
       } catch (e) {
-        console.error("Error deleting file:", error);
+        console.error("Error deleting file:", e);
       }
     });
-
-    setSelectedDelete([]); // Reset selection
-    loadFiles();           // Reload updated list
+    setSelectedDelete([]);
+    loadFiles();
   };
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      {/* Toggle between delete and normal mode */}
-      <TouchableOpacity style={styles.modeButton} onPress={() => setDeleteMode((d) => !d)}>
-        <Text style={styles.modeButtonText}>{deleteMode ? "Delete Mode" : "Normal Mode"}</Text>
-      </TouchableOpacity>
-
-      {/* Confirm deletion button only appears if some trees are selected */}
-      {selectedDelete.length != 0 && (
-        <TouchableOpacity style={styles.acceptButton} onPress={handleDelete} >
-          <Text style={styles.acceptButtonText}>Accept</Text>
+    <ImageBackground
+      source={require("@/assets/images/grassBackground.png")}
+      style={styles.screenContainer}
+    >
+      <View style={styles.overlay}>
+        <TouchableOpacity style={styles.modeButton} onPress={() => setDeleteMode(d => !d)}>
+          <Text style={styles.modeButtonText}>
+            {deleteMode ? "Delete\nMode" : "Normal\nMode"}
+          </Text>
         </TouchableOpacity>
-      )}
 
-      {/* Error display if something goes wrong */}
-      {error ? (
-        <Text style={{ color: "red" }}>No tree here</Text>
-      ) : (
-        // <ScrollView>
-        //   {/* Display each tree as a selectable TreeDisplay component */}
-        //   {fileNames.map((name, index) => {
-        //     if (name.includes(".png")) {
-        //       return (
-        //         <TreeDisplay
-        //           key={index}
-        //           treeName={name}
-        //           buttonName={buttonName}
-        //           isDeleting={deleteMode}
-        //           pushBeingDelete={(newTree) => {
-        //             setSelectedDelete((s) => [...s, newTree]);
-        //           }}
-        //           removeBeingDelete={(Tree) => {
-        //             setSelectedDelete((s) =>
-        //               s.filter((item) => item != Tree)
-        //             );
-        //           }}
-        //         />
-        //       );
-        //     }
-        //   })}
-        // </ScrollView>
-        <View style={styles.bagContainer}>
-        <Image source={require("@/assets/images/gardenBag1.png")} style={styles.bagBackground} />
-        
-        <View style={styles.gridOverlay}>
-          {fileNames
-            .filter((name) => name.endsWith(".png"))
-            .slice(0, 12) // Limit to 3x4 = 12 items
-            .map((name, index) => (
-              <TreeDisplay
-                key={index}
-                treeName={name}
-                buttonName={buttonName}
-                isDeleting={deleteMode}
-                pushBeingDelete={(newTree) =>
-                  setSelectedDelete((s) => [...s, newTree])
-                }
-                removeBeingDelete={(Tree) =>
-                  setSelectedDelete((s) => s.filter((item) => item !== Tree))
-                }
-              />
-            ))}
-        </View>
+        {selectedDelete.length > 0 && (
+          <TouchableOpacity style={styles.acceptButton} onPress={handleDelete}>
+            <Text style={styles.acceptButtonText}>
+              Delete selected tree(s)?
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {error ? (
+          <Text style={{ color: "red" }}>No tree here</Text>
+        ) : (
+          <View style={styles.bagContainer}>
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+            >
+              {fileNames.map((name, index) =>
+                name.endsWith(".png") ? (
+                  <View key={index} style={styles.treeSlot}>
+                    <TreeDisplay
+                      treeName={name}
+                      buttonName={buttonName}
+                      isDeleting={deleteMode}
+                      pushBeingDelete={(tree) =>
+                        setSelectedDelete((prev) => [...prev, tree])
+                      }
+                      removeBeingDelete={(tree) =>
+                        setSelectedDelete((prev) => prev.filter((t) => t !== tree))
+                      }
+                    />
+                  </View>
+                ) : null
+              )}
+            </ScrollView>
+          </View>
+        )}
+
+        <TouchableOpacity style={styles.removeTreeButton} onPress={() => handleChoose(buttonName, "")}>
+          <Text style={styles.removeTreeButtonText}>Remove tree</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Image source={require('@/assets/images/goBack.png')} style={styles.icon} />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
       </View>
-      )}
-
-      {/* Button to remove tree from the current garden slot */}
-      <TouchableOpacity style={styles.removeTreeButton} onPress={() => handleChoose(buttonName, "")}>
-        <Text style={styles.removeTreeButtonText}>Remove tree</Text>
-      </TouchableOpacity>
-      
-      {/* Go back to previous screen */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Image source={require('@/assets/images/goBack.png')} style={styles.icon} />
-        <Text style={styles.backText}>Back</Text>
-      </TouchableOpacity>
-  </View>
+    </ImageBackground>
   );
 }
 
-// (Unused) Styles defined for reference or potential reuse
-const styles = StyleSheet.create({
 
-  container: {
+const styles = StyleSheet.create({
+  screenContainer: {
     flex: 1,
     width: "100%",
     height: "100%",
+  },
+  overlay: {
+    flex: 1,
     alignItems: "center",
-    justifyContent: "flex-end",
-    paddingBottom: 100,
+    padding: 20,
   },
-  backgroundImage: {
+  bagContainer: {
     position: "absolute",
-    width: "100%",
-    height: "100%",
-    zIndex: -1,
-  },
-  potContainer: {
-    position: "absolute",
-    bottom: 100,
-    alignItems: "center",
-  },
-  treeContainer: {
-    position: "absolute",
-    bottom: 0,
-    alignItems: "center",
-  },
-  pot: {
-    width: 50,
-    height: 50,
-  },
-  tree: {
+    top: 160,
     width: 300,
-    height: 400,
-    marginBottom: -50,
-  },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    maxHeight: 500,
     padding: 10,
-    backgroundColor: "#4CAF50",
-    borderRadius: 8,
-    marginTop: 10,
+    marginVertical: 20,
+    backgroundColor: "darkgreen",
+    borderColor: "#ccc",
+    borderWidth: 2,
+    borderRadius: 20,
+    elevation: 5, // Android shadow
+    shadowColor: "#000", // iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
-  icon: {
-    width: 25,
-    height: 25,
-    marginRight: 10,
+  scrollView: {
+    width: "100%",
+    maxHeight: 400,
+  },
+  scrollContent: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    padding: 10,
+  },
+  treeSlot: {
+    width: 200,
+    height: 200,
+    margin: 5,
+    backgroundColor: "lightyellow",
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modeButton: {
+    position: "absolute",
+    top: 10,
+    right: 20,
+    width: 100,
+    height: 100,
+    padding: 5,
+    backgroundColor: "lightgreen",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modeButtonText: {
+    color: "black",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  acceptButton: {
+    position: "absolute",
+    top: 120,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: "green",
+    borderRadius: 10,
   },
   acceptButtonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  acceptButton: {
-    alignSelf: "center", // Center horizontally
-    marginVertical: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: "green", 
-    borderRadius: 10,
-  },
-  backText: {
-    color: "white",
-    fontSize: 16,
     fontWeight: "bold",
-  },
-  modeButton: {
-    alignSelf: "center", // Center horizontally
-    marginVertical: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: "#4CAF50", // Green color
-    borderRadius: 10,
-  },
-  modeButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
     textAlign: "center",
+    lineHeight: 20,
   },
   removeTreeButton: {
-    alignSelf: "center", // Center horizontally
-    marginVertical: 10,
+    position: "absolute",
+    bottom: 20,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    backgroundColor: "red", // Green color
+    backgroundColor: "red",
     borderRadius: 10,
   },
   removeTreeButtonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "600",
-    textAlign: "center",
   },
-  bagContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 20,
-    position: "relative",
-  },
-  bagBackground: {
-    width: 500,
-    height: 600,
-    resizeMode: "contain",
+  backButton: {
     position: "absolute",
-    zIndex: -1,
-    top: -50,
-  },
-
-  gridOverlay: {
+    top: 20,
+    left: 20,
     flexDirection: "row",
-    flexWrap: "wrap",
-    width: 500,
-    height: 600,
+    alignItems: "center",
     padding: 10,
-    justifyContent: "space-between",
-    alignContent: "space-between",
-  },  
+    backgroundColor: "#4CAF50",
+    borderRadius: 8,
+  },
+  backText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
 });
