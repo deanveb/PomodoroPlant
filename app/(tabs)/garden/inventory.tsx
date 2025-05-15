@@ -1,5 +1,13 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ImageBackground } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Text,
+  ScrollView,
+  ImageBackground,
+} from "react-native";
 import * as FileSystem from "expo-file-system";
 import { useFocusEffect } from "@react-navigation/native";
 import { useState, useCallback } from "react";
@@ -24,7 +32,7 @@ export default function InventoryScreen() {
   const checkFileExistence = async () => {
     const fileExist = await FileSystem.getInfoAsync(fileUri);
     if (!fileExist.exists) {
-      const defaultData = { layout: { pot: "", tree1: "", tree2: "" } };
+      const defaultData = {};
       await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(defaultData));
     }
   };
@@ -45,7 +53,6 @@ export default function InventoryScreen() {
       loadFiles();
     }, [])
   );
-  
 
   const handleDelete = () => {
     setDeleteMode(false);
@@ -67,7 +74,10 @@ export default function InventoryScreen() {
       style={styles.screenContainer}
     >
       <View style={styles.overlay}>
-        <TouchableOpacity style={styles.modeButton} onPress={() => setDeleteMode(d => !d)}>
+        <TouchableOpacity
+          style={styles.modeButton}
+          onPress={() => setDeleteMode((d) => !d)}
+        >
           <Text style={styles.modeButtonText}>
             {deleteMode ? "Delete\nMode" : "Normal\nMode"}
           </Text>
@@ -100,7 +110,9 @@ export default function InventoryScreen() {
                         setSelectedDelete((prev) => [...prev, tree])
                       }
                       removeBeingDelete={(tree) =>
-                        setSelectedDelete((prev) => prev.filter((t) => t !== tree))
+                        setSelectedDelete((prev) =>
+                          prev.filter((t) => t !== tree)
+                        )
                       }
                     />
                   </View>
@@ -110,19 +122,27 @@ export default function InventoryScreen() {
           </View>
         )}
 
-        <TouchableOpacity style={styles.removeTreeButton} onPress={() => handleChoose(buttonName, "")}>
+        <TouchableOpacity
+          style={styles.removeTreeButton}
+          onPress={() => handleChoose(buttonName, "")}
+        >
           <Text style={styles.removeTreeButtonText}>Remove tree</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Image source={require('@/assets/images/goBack.png')} style={styles.icon} />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Image
+            source={require("@/assets/images/goBack.png")}
+            style={styles.icon}
+          />
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
   );
 }
-
 
 const styles = StyleSheet.create({
   screenContainer: {
