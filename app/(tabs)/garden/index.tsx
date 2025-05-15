@@ -3,21 +3,18 @@ import {
   View,
   StyleSheet,
   Image,
-  TouchableOpacity,
-  ImageResizeMode,
 } from "react-native";
 import * as FileSystem from "expo-file-system";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { TreeLayoutInfo } from "@/interfaces";
-import TreePot from "@/components/treePot";
+import TreePot from "@/components/TreePot";
 
 
 export default function Tab() {
   const router = useRouter();
   const [fileContent, setFileContent] = useState<TreeLayoutInfo>();
   const [layoutData, setLayoutData] = useState<any>(undefined);
-  const [hasPotTree, setHasPotTree] = useState<any>(undefined);
 
   const fileUri = FileSystem.documentDirectory + "treeLayout.json";
 

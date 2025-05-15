@@ -14,7 +14,7 @@ interface pot {
   // style: Object,
 }
 
-export default function treePot({ potName, layoutData }: pot) {
+export default function TreePot({ potName, layoutData }: pot) {
   const hasPotTree = layoutData && "pot" in layoutData && layoutData["pot"];
   const resized = useRef<number>(0);
   const [resizeFix, setResizeFix] = useState<ImageResizeMode>("contain");
