@@ -21,6 +21,7 @@ const PomodoroTimer = () => {
   const [timeLeft, setTimeLeft] = useState(3);
   const [isActive, setIsActive] = useState(false);
   const [fileContent, setFileContent] = useState<setting>();
+  const [triggerRender, setTriggerRender] = useState<boolean>(false);
   const interval = useRef(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const currentTime = useRef<number>(0);
@@ -40,7 +41,12 @@ const PomodoroTimer = () => {
       const fileExist = await FileSystem.getInfoAsync(fileUri);
       if (!fileExist.exists) {
         try {
-          await FileSystem.writeAsStringAsync(fileUri, "{}", {
+          await FileSystem.writeAsStringAsync(fileUri, `{
+            workDuration: 1500,
+            shortBreakDuration: 300,
+            longBreakDuration: 900,
+            session: 4
+            }`, {
             encoding: FileSystem.EncodingType.UTF8,
           });
         } catch (e) {
@@ -58,12 +64,14 @@ const PomodoroTimer = () => {
       const FileContent = await FileSystem.readAsStringAsync(fileUri, {
         encoding: FileSystem.EncodingType.UTF8,
       });
-
+      
       const jsonData = JSON.parse(FileContent) as setting;
       setFileContent(jsonData);
     } catch (e) {
+      // Need a rerender so that it update the timer
+      setTriggerRender(prev => !prev);
       console.error("Error reading file content: ", e);
-      return null;
+      return;
     }
   }, [fileUri]);
 
