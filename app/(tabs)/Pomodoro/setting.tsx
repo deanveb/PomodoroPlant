@@ -97,10 +97,10 @@ export default function App() {
       }
     } 
 
-    data.session = parseInt(setting.session);
-    data.longBreakDuration = parseInt(setting.longBreak) * 60;
-    data.shortBreakDuration = parseInt(setting.shortBreak) * 60;
-    data.workDuration = parseInt(setting.work) * 60;
+    data.session = Math.min(parseInt(setting.session), 10**5);
+    data.longBreakDuration = Math.min(parseInt(setting.longBreak) * 60, 5940);
+    data.shortBreakDuration = Math.min(parseInt(setting.shortBreak) * 60, 5940);
+    data.workDuration = Math.min(parseInt(setting.work) * 60, 5940);
 
 
     // console.log(`data:${data}`);
