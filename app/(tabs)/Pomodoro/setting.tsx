@@ -17,14 +17,14 @@ export default function App() {
   const [error, setError] = useState<string>();
   const [fileContent, setFileContent] = useState<setting>();
 
-  const fileUri = FileSystem.documentDirectory + "setting.json";
+  const settingUri = FileSystem.documentDirectory + "setting.json";
 
   useEffect(() => {
     const checkExist = async () => {
-      const fileExist = await FileSystem.getInfoAsync(fileUri);
+      const fileExist = await FileSystem.getInfoAsync(settingUri);
       if (!fileExist.exists) {
         try {
-          await FileSystem.writeAsStringAsync(fileUri, "{}", {
+          await FileSystem.writeAsStringAsync(settingUri, "{}", {
             encoding: FileSystem.EncodingType.UTF8,
           });
         } catch (e) {
@@ -36,7 +36,7 @@ export default function App() {
 
     const getData = async () => {
       try {
-        const FileContent = await FileSystem.readAsStringAsync(fileUri, {
+        const FileContent = await FileSystem.readAsStringAsync(settingUri, {
           encoding: FileSystem.EncodingType.UTF8,
         });
 
@@ -67,7 +67,7 @@ export default function App() {
       try {
         const jsonValue = JSON.stringify(value);
         await FileSystem.writeAsStringAsync(
-          fileUri,
+          settingUri,
           jsonValue,
           { encoding: FileSystem.EncodingType.UTF8 }
         );

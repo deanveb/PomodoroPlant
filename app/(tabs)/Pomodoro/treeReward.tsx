@@ -1,16 +1,58 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { View, Image, Alert, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import * as FileSystem from "expo-file-system";
 import { htmlContent } from "../../../lib/htmlText";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
+import { owned } from "@/interfaces";
+
 export default function App() {
+  const [ownedContent, setOwnedContent] = useState<owned>({cash: 0, trees: {}});
   const router = useRouter();
   const [message, setMessage] = useState("");
+  const { time } = useLocalSearchParams();
+  const timeValue : string = time.toString();
 
   const webviewRef = useRef<WebView>(null);
+  const ownedUri = FileSystem.documentDirectory + "owned.json";
+
+  useEffect(() => {
+    const loadOwned = async () => {
+      try {
+        const FileContent = await FileSystem.readAsStringAsync(ownedUri, {
+          encoding: FileSystem.EncodingType.UTF8,
+        });
+
+        const jsonData = JSON.parse(FileContent) as owned;
+        setOwnedContent(jsonData);
+      } catch (e) {
+        console.error("Error reading owned content: ", e);
+        return null;
+      }
+    }
+    
+    loadOwned();
+  }, []);
+  useEffect(() => {
+    const saveCash = async (value: owned) => {
+      try {
+        const jsonValue = JSON.stringify(value);
+        await FileSystem.writeAsStringAsync(ownedUri, jsonValue, {
+          encoding: FileSystem.EncodingType.UTF8,
+        });
+        console.log(`Saved ${jsonValue}`);
+      } catch (e) {
+        console.error("while storing data: ", e);
+      }
+    };
+    
+    if (ownedContent) {
+      const data : owned = {...ownedContent, cash : parseInt(timeValue) + ownedContent.cash};
+      saveCash(data);
+    }
+  }, [ownedContent, timeValue]);
 
   const handleMessage = async (event: WebViewMessageEvent) => {
     const base64Image = event.nativeEvent.data;
@@ -39,9 +81,9 @@ export default function App() {
 
       // Save to app's document directory instead of the gallery
       const fileName = `canvas-image-${new Date().getTime()}.png`;
-      const fileUri = FileSystem.documentDirectory + "trees/" + fileName;
+      const treeUri = FileSystem.documentDirectory + "trees/" + fileName;
 
-      await FileSystem.writeAsStringAsync(fileUri, base64, {
+      await FileSystem.writeAsStringAsync(treeUri, base64, {
         encoding: FileSystem.EncodingType.Base64,
       });
     } catch (err: any) {
@@ -61,8 +103,11 @@ export default function App() {
           javaScriptEnabled={true}
         />
       </View>
-        {/* {message ? <Text>Error: {message}</Text> : null} */}
         <MaterialIcons name="pinch" size={40}/>
+        <View>
+          <Text>+{time}</Text>
+          <MaterialIcons name="payments" size={20} color="#444" />
+        </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={() => router.back()}
@@ -91,8 +136,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   webview: {
-    width: 350,
-    height: 350,
+    width: 300,
+    height: 300,
     borderRadius: 250,
     backgroundColor: "#e4e5a3",
     overflow: "scroll",

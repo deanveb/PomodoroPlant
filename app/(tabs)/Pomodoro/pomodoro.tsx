@@ -9,8 +9,11 @@ import {
   Image,
 } from "react-native";
 import * as FileSystem from "expo-file-system";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+
 import { setting } from "@/interfaces";
-import { Ionicons } from "@expo/vector-icons";
+import { owned } from "@/interfaces";
+import { tree } from "@/interfaces";
 
 const PomodoroTimer = () => {
   const [appState, setAppState] = useState(AppState.currentState);
@@ -20,12 +23,15 @@ const PomodoroTimer = () => {
   const [breakMode, setBreakMode] = useState<"short" | "long">("short");
   const [timeLeft, setTimeLeft] = useState(3);
   const [isActive, setIsActive] = useState(false);
-  const [fileContent, setFileContent] = useState<setting>();
+  const [settingContent, setSettingContent] = useState<setting>();
+  const [ownedContent, setOwnedContent] = useState<owned>();
+  const [cash, setCash] = useState<number>(0);
   const interval = useRef(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const currentTime = useRef<number>(0);
 
-  const fileUri = FileSystem.documentDirectory + "setting.json";
+  const settingUri = FileSystem.documentDirectory + "setting.json";
+  const ownedUri = FileSystem.documentDirectory + "owned.json";
 
   // Timer durations in seconds
   const workDurationRef = useRef(3);
@@ -37,10 +43,21 @@ const PomodoroTimer = () => {
 
   useEffect(() => {
     const checkExist = async () => {
-      const fileExist = await FileSystem.getInfoAsync(fileUri);
-      if (!fileExist.exists) {
+      const settingExist = await FileSystem.getInfoAsync(settingUri);
+      if (!settingExist.exists) {
         try {
-          await FileSystem.writeAsStringAsync(fileUri, "{}", {
+          await FileSystem.writeAsStringAsync(settingUri, "{}", {
+            encoding: FileSystem.EncodingType.UTF8,
+          });
+        } catch (e) {
+          console.error("Error while creating empty file: ", e);
+          return;
+        }
+      }
+      const ownedExist = await FileSystem.getInfoAsync(settingUri);
+      if (!ownedExist) {
+        try {
+          await FileSystem.writeAsStringAsync(ownedExist, "{}", {
             encoding: FileSystem.EncodingType.UTF8,
           });
         } catch (e) {
@@ -55,37 +72,52 @@ const PomodoroTimer = () => {
 
   const loadSettings = useCallback(async () => {
     try {
-      const FileContent = await FileSystem.readAsStringAsync(fileUri, {
+      const FileContent = await FileSystem.readAsStringAsync(settingUri, {
         encoding: FileSystem.EncodingType.UTF8,
       });
 
       const jsonData = JSON.parse(FileContent) as setting;
-      setFileContent(jsonData);
+      setSettingContent(jsonData);
     } catch (e) {
-      console.error("Error reading file content: ", e);
+      console.error("Error reading setting content: ", e);
       return null;
     }
-  }, [fileUri]);
+  }, [settingUri]);
+
+  const loadOwned = useCallback(async () => {
+    try {
+      const FileContent = await FileSystem.readAsStringAsync(ownedUri, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      const jsonData = JSON.parse(FileContent) as owned;
+      setOwnedContent(jsonData);
+    } catch (e) {
+      console.error("Error reading owned content: ", e);
+      return null;
+    }
+  }, [ownedUri]);
 
   useFocusEffect(
     useCallback(() => {
       loadSettings();
+      loadOwned();
     }, [loadSettings])
   );
 
   useEffect(() => {
     if (isActive) return;
-    if (!fileContent) return;
+    if (!settingContent) return;
 
     const breakMode =
       breakDuration.current === shortBreakDurationRef.current
         ? "shortBreak"
         : "longBreak";
 
-    workDurationRef.current = fileContent.workDuration / 60 || 25 * 60;
-    shortBreakDurationRef.current = fileContent.shortBreakDuration || 5 * 60;
-    longBreakDurationRef.current = fileContent.longBreakDuration || 15 * 60;
-    longBreakIntervalRef.current = fileContent.session || 4;
+    workDurationRef.current = settingContent.workDuration / 60 || 25 * 60;
+    shortBreakDurationRef.current = settingContent.shortBreakDuration || 5 * 60;
+    longBreakDurationRef.current = settingContent.longBreakDuration || 15 * 60;
+    longBreakIntervalRef.current = settingContent.session || 4;
 
     breakDuration.current =
       breakMode === "shortBreak"
@@ -93,7 +125,13 @@ const PomodoroTimer = () => {
         : longBreakDurationRef.current;
 
     handleResetTimer();
-  }, [fileContent]);
+  }, [settingContent]);
+
+  useEffect(() => {
+    if (ownedContent) {
+      setCash(ownedContent.cash);
+    }
+  }, [ownedContent]);
 
   const changeToSecond = (input: number) => {
     return Math.max(0, Math.floor(input / 1000));
@@ -165,7 +203,10 @@ const PomodoroTimer = () => {
     if ((mode === "work" ? "break" : "work") === "break") {
       updateInterval();
       // TODO: Switch to in-app notification (optional)
-      router.push("/(tabs)/Pomodoro/treeReward");
+      router.push({
+        pathname: "/(tabs)/Pomodoro/treeReward",
+        params: {time: workDurationRef.current},
+      });
     }
   };
 
@@ -229,9 +270,15 @@ const PomodoroTimer = () => {
           <Text style={styles.logoText}><Ionicons name="leaf" size={20} color="b87de9" />Pomodoro Plant</Text>
         </View>
         <View style={styles.navButtonsContainer}>
-          <Link href={"/(tabs)/Pomodoro/setting"}>
-            <Ionicons name="settings" size={34} color="black" />
-          </Link>
+          <View>
+            <Text>{cash}</Text>
+            <MaterialIcons name="payments" size={20} color="#444" />
+          </View>
+          <View>
+            <Link href={"/(tabs)/Pomodoro/setting"}>
+              <Ionicons name="settings" size={34} color="black" />
+            </Link>
+          </View>
         </View>
       </View>
 
@@ -286,6 +333,9 @@ const PomodoroTimer = () => {
                   color="b87de9"
                 />
               </Text>
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <Text>change</Text>
             </TouchableOpacity>
           </View>
         </View>
