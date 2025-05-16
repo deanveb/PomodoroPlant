@@ -13,7 +13,6 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 import { setting } from "@/interfaces";
 import { owned } from "@/interfaces";
-import { tree } from "@/interfaces";
 
 const PomodoroTimer = () => {
   const [appState, setAppState] = useState(AppState.currentState);

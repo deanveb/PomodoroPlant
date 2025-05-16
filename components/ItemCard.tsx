@@ -1,5 +1,15 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { Button, Image, ImageSourcePropType, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import {
+  Button,
+  Image,
+  ImageSourcePropType,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import * as FileSystem from "expo-file-system";
+import { owned } from "@/interfaces";
 
 interface ItemCard {
   title: string;
@@ -7,16 +17,59 @@ interface ItemCard {
   image: ImageSourcePropType;
 }
 
-export default function ItemCard({ title: name, price, image }: ItemCard) {
+export default function ItemCard({ title, price, image }: ItemCard) {
+  const [ownedContent, setOwnedContent] = useState<owned>();
+
+  const ownedUri = FileSystem.documentDirectory + "owned.json";
+
+  const loadOwned = useCallback(async () => {
+    try {
+      const FileContent = await FileSystem.readAsStringAsync(ownedUri, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      const jsonData = JSON.parse(FileContent) as owned;
+      setOwnedContent(jsonData);
+    } catch (e) {
+      console.error("Error reading owned content: ", e);
+      return null;
+    }
+  }, [ownedUri]);
+
+  useEffect(() => {
+    loadOwned();
+  }, []);
   const handlePurchase = () => {
-    // Add your purchase logic here
+    if (!ownedContent) return;
+    if (ownedContent.cash >= price && !(title in ownedContent.trees)) {
+      const savePurchase = async (value: owned) => {
+        try {
+          const jsonValue = JSON.stringify(value);
+          await FileSystem.writeAsStringAsync(ownedUri, jsonValue, {
+            encoding: FileSystem.EncodingType.UTF8,
+          });
+          console.log(`Saved ${jsonValue}`);
+        } catch (e) {
+          console.error("while storing data: ", e);
+        }
+      };
+
+      const data: owned = {
+        ...ownedContent,
+        cash: ownedContent.cash - price,
+        trees: { ...ownedContent.trees, [title]: image },
+      };
+
+      savePurchase(data);
+      loadOwned();
+    }
   };
 
   // TODO: add font to the title for each new tree
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.title}>{name}</Text>
+        <Text style={styles.title}>{title}</Text>
         <Image source={image} style={styles.image} resizeMode="contain" />
         <View style={styles.priceContainer}>
           <Text style={styles.priceText}>{price.toFixed(2)}</Text>

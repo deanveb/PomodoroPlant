@@ -1,3 +1,5 @@
+import { ImageSourcePropType } from "react-native";
+
 export interface setting {
   shortBreakDuration: number;
   longBreakDuration: number;
@@ -5,13 +7,9 @@ export interface setting {
   session: number;
 }
 
-export interface tree {
-  image: string;
-}
-
 export interface owned {
   cash: number;
-  trees: Record<string, tree>;
+  trees: Record<string, ImageSourcePropType>;
 }
 
 export interface TreeLayoutInfo {
