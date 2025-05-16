@@ -77,7 +77,7 @@ export default function Tab() {
   };
 
   useEffect(() => {
-    console.log("hi");
+    // console.log("hi");
     
     setLayoutData(fileContent ? fileContent.layout : {});
     // setHasPotTree(layoutData && "pot" in layoutData && layoutData["pot"]);

@@ -8,6 +8,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 export default function shop() {
   const [ownedContent, setOwnedContent] = useState<owned>();
+  const [userCash, setUserCash] = useState<number>(0);
+  const [reRender, setReRender] = useState<boolean>(false);
 
   const ownedUri = FileSystem.documentDirectory + "owned.json";
 
@@ -29,7 +31,12 @@ export default function shop() {
     loadOwned();
   }, [])
 
-  const userCash = ownedContent ? ownedContent.cash : 0;
+  useEffect(() => {
+    if (!ownedContent) return;
+    setUserCash(ownedContent.cash);
+    console.log("user cash set");
+    
+  }, [ownedContent]);
 
   return (
     <View style={styles.container}>
@@ -41,6 +48,7 @@ export default function shop() {
         title="Cherry Blossom"
         price={1}
         image={require("@/assets/images/trees/Cherry_Blossom.png")}
+        updateUserCash={number => setUserCash(number)}
       />
     </View>
   )

@@ -15,10 +15,12 @@ interface ItemCard {
   title: string;
   price: number;
   image: ImageSourcePropType;
+  updateUserCash: (value : number) => void;
 }
 
-export default function ItemCard({ title, price, image }: ItemCard) {
+export default function ItemCard({ title, price, image, updateUserCash }: ItemCard) {
   const [ownedContent, setOwnedContent] = useState<owned>();
+  const [btnText, setBtnText] = useState<"Mua" | "Đã mua">("Mua");
 
   const ownedUri = FileSystem.documentDirectory + "owned.json";
 
@@ -39,9 +41,15 @@ export default function ItemCard({ title, price, image }: ItemCard) {
   useEffect(() => {
     loadOwned();
   }, []);
+
+  useEffect(() => {
+    if (!ownedContent) return;
+    setBtnText(title in ownedContent.trees ? "Đã mua" : "Mua");
+  }, [ownedContent]);
+
   const handlePurchase = () => {
     if (!ownedContent) return;
-    if (ownedContent.cash >= price && !(title in ownedContent.trees)) {
+    if (ownedContent.cash >= price) {
       const savePurchase = async (value: owned) => {
         try {
           const jsonValue = JSON.stringify(value);
@@ -60,6 +68,7 @@ export default function ItemCard({ title, price, image }: ItemCard) {
         trees: { ...ownedContent.trees, [title]: image },
       };
 
+      updateUserCash(ownedContent.cash - price);
       savePurchase(data);
       loadOwned();
     }
@@ -76,7 +85,7 @@ export default function ItemCard({ title, price, image }: ItemCard) {
           <MaterialIcons name="payments" size={20} color="#444" />
         </View>
         <View style={styles.buttonContainer}>
-          <Button title="Buy" onPress={handlePurchase} color="#2196F3" />
+          <Button title={btnText} onPress={handlePurchase} color="#2196F3" />
         </View>
       </View>
     </View>
