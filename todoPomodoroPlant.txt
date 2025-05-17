@@ -26,23 +26,41 @@ TINH NANG MOI:
 - run background (in notification tab)
 - choose app to study, if not in one of selected app(s) for 10 minutes, appear popup: "dmm hoc di"
 
-RUN APP WITH cmd: ./start.sh
+RUN APP WITH cmd:
+    ./start.sh (Linux)
+    .\start.bat (Windows)
 
 GIT COMMANDS:
-1. Setup git (once):
+1. Setup git (once, setup):
+
     git config --global user.name "your username"
+
     git config --global user.email "your email"
+
 2. Clone repo:
+
     git clone https://github.com/username/repo.git
+
     cd repo
+
     (**start coding) code .
+
 3. Make changes, commit and push:
+
     git status
+
     git add .
+
     git commit -m "your message"
+
     git push origin main (or whatever your branch name is; if "git push", pushes to current connected branch)
+
 4. Pull latest changes:
+
     git pull origin main (similar to above)
+
 5. Create and switch branch:
+
     git checkout -b new-branch-name
+
     git push origin new-branch-name
