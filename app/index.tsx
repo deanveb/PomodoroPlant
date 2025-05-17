@@ -1,17 +1,29 @@
-import { useFocusEffect, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { View, Text } from "react-native";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function app() {
+export default function Index() {
   const router = useRouter();
 
-  useFocusEffect(() => {
-    router.replace('/(tabs)/Pomodoro/pomodoro');
-  });
+  useEffect(() => {
+    const checkName = async () => {
+      const savedName = await AsyncStorage.getItem("userName");
+
+      if (savedName) {
+        // router.replace("/(tabs)/Pomodoro");
+          router.replace('/(tabs)/Pomodoro/pomodoro');
+      } else {
+        // router.replace("/(auth)/login");
+      }
+    };
+
+    checkName();
+  }, []);
 
   return (
     <View>
-      <Text>Loading..</Text>
+      <Text>Đang kiểm tra người dùng...</Text>
     </View>
-  )
+  );
 }
