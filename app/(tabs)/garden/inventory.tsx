@@ -3,13 +3,14 @@ import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ImageBackg
 import * as FileSystem from "expo-file-system";
 import { useFocusEffect } from "@react-navigation/native";
 import { useState, useCallback } from "react";
-
 import TreeDisplay from "@/components/TreeDisplay";
 import useChoose from "@/hooks/useChoose";
+import { useFileSync } from "@/hooks/useFileSync";
 
 export default function InventoryScreen() {
   const router = useRouter();
   const handleChoose = useChoose();
+  const { fileContent, refreshKey } = useFileSync();
 
   const { name } = useLocalSearchParams();
   const buttonName = name as string;
@@ -19,46 +20,72 @@ export default function InventoryScreen() {
   const [selectedDelete, setSelectedDelete] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const fileUri = FileSystem.documentDirectory + "treeLayout.json";
-
-  const checkFileExistence = async () => {
-    const fileExist = await FileSystem.getInfoAsync(fileUri);
-    if (!fileExist.exists) {
-      const defaultData = { layout: { pot: "", tree1: "", tree2: "" } };
-      await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(defaultData));
-    }
-  };
-
   const loadFiles = async () => {
     try {
       const fileDirectory = FileSystem.documentDirectory + "trees/";
+      const dirExists = await FileSystem.getInfoAsync(fileDirectory);
+      
+      if (!dirExists.exists) {
+        await FileSystem.makeDirectoryAsync(fileDirectory, { intermediates: true });
+        setFileNames([]);
+        return;
+      }
+
       const files = await FileSystem.readDirectoryAsync(fileDirectory);
-      setFileNames(files);
+      setFileNames(files.filter(file => file.endsWith('.png')));
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");
+      setFileNames([]);
     }
   };
 
   useFocusEffect(
     useCallback(() => {
-      checkFileExistence();
       loadFiles();
-    }, [])
+    }, [refreshKey])
   );
+
+  const resetDeleteState = () => {
+    setSelectedDelete([]);
+  };
+
+  const handleModeToggle = () => {
+    setDeleteMode(prevMode => {
+      // If switching from delete mode to normal mode, clear selected items
+      if (prevMode) {
+        setSelectedDelete([]);
+      }
+      return !prevMode;
+    });
+  };
   
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    if (selectedDelete.length === 0) return;
+    
     setDeleteMode(false);
     const fileDirectory = FileSystem.documentDirectory + "trees/";
-    selectedDelete.forEach(async (tree) => {
-      try {
-        await FileSystem.deleteAsync(fileDirectory + tree);
-      } catch (e) {
-        console.error("Error deleting file:", e);
+    
+    try {
+      await Promise.all(
+        selectedDelete.map(async (tree) => {
+          await FileSystem.deleteAsync(fileDirectory + tree);
+        })
+      );
+      
+      // Check if we're deleting the currently planted tree
+      const currentTree = fileContent?.layout[buttonName as keyof typeof fileContent.layout];
+      if (currentTree && selectedDelete.includes(currentTree)) {
+        await handleChoose(buttonName, "");
       }
-    });
-    setSelectedDelete([]);
-    loadFiles();
+      
+      setSelectedDelete([]);
+      await loadFiles();
+    } catch (e) {
+      console.error("Error deleting files:", e);
+      setError("Failed to delete trees");
+    }
   };
 
   return (
@@ -67,12 +94,14 @@ export default function InventoryScreen() {
       style={styles.screenContainer}
     >
       <View style={styles.overlay}>
-        <TouchableOpacity style={styles.modeButton} onPress={() => setDeleteMode(d => !d)}>
+        {/* Mode Toggle Button */}
+        <TouchableOpacity style={styles.modeButton} onPress={handleModeToggle}>
           <Text style={styles.modeButtonText}>
             {deleteMode ? "Delete\nMode" : "Normal\nMode"}
           </Text>
         </TouchableOpacity>
 
+        {/* Delete Confirmation */}
         {selectedDelete.length > 0 && (
           <TouchableOpacity style={styles.acceptButton} onPress={handleDelete}>
             <Text style={styles.acceptButtonText}>
@@ -81,36 +110,43 @@ export default function InventoryScreen() {
           </TouchableOpacity>
         )}
 
+        {/* Error or Content */}
         {error ? (
-          <Text style={{ color: "red" }}>No tree here</Text>
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : fileNames.length === 0 ? (
+          <View style={styles.noTreesContainer}>
+            <Text style={styles.noTreesText}>No trees available</Text>
+          </View>
         ) : (
           <View style={styles.bagContainer}>
             <ScrollView
               style={styles.scrollView}
               contentContainerStyle={styles.scrollContent}
             >
-              {fileNames.map((name, index) =>
-                name.endsWith(".png") ? (
-                  <View key={index} style={styles.treeSlot}>
-                    <TreeDisplay
-                      treeName={name}
-                      buttonName={buttonName}
-                      isDeleting={deleteMode}
-                      pushBeingDelete={(tree) =>
-                        setSelectedDelete((prev) => [...prev, tree])
-                      }
-                      removeBeingDelete={(tree) =>
-                        setSelectedDelete((prev) => prev.filter((t) => t !== tree))
-                      }
-                    />
-                  </View>
-                ) : null
-              )}
+              {fileNames.map((name, index) => (
+                <View key={`${name}-${index}-${refreshKey}`} style={styles.treeSlot}>
+                  <TreeDisplay
+                    treeName={name}
+                    buttonName={buttonName}
+                    isDeleting={deleteMode}
+                    resetKey={deleteMode ? "delete" : "normal"} // Add this prop
+                    pushBeingDelete={(tree) => setSelectedDelete((prev) => [...prev, tree])}
+                    removeBeingDelete={(tree) => setSelectedDelete((prev) => prev.filter((t) => t !== tree))}
+                    refreshKey={refreshKey}
+                  />
+                </View>
+              ))}
             </ScrollView>
           </View>
         )}
 
-        <TouchableOpacity style={styles.removeTreeButton} onPress={() => handleChoose(buttonName, "")}>
+        {/* Action Buttons */}
+        <TouchableOpacity 
+          style={styles.removeTreeButton} 
+          onPress={() => handleChoose(buttonName, "")}
+        >
           <Text style={styles.removeTreeButtonText}>Remove tree</Text>
         </TouchableOpacity>
 
@@ -123,7 +159,6 @@ export default function InventoryScreen() {
   );
 }
 
-
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
@@ -134,6 +169,60 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     padding: 20,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: "red",
+    fontSize: 16,
+  },
+  noTreesContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noTreesText: {
+    color: "#333",
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: "darkgreen",
+    overflow: "hidden",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+  emptyContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    right: '50%',
+    bottom: '50%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    backgroundColor: 'lightgray',
+    width: 500,
+    height: 200,
+  },
+  emptyText: {
+    fontSize: 20,
+    fontWeight: "600",
+    textAlign: "center",
   },
   bagContainer: {
     position: "absolute",
@@ -146,8 +235,8 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderWidth: 2,
     borderRadius: 20,
-    elevation: 5, // Android shadow
-    shadowColor: "#000", // iOS shadow
+    elevation: 5,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,

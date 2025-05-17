@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   AppState,
-  Image,
 } from "react-native";
 import * as FileSystem from "expo-file-system";
 import { setting } from "@/interfaces";

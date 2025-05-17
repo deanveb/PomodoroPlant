@@ -1,21 +1,28 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { View, StyleSheet, Image, TouchableOpacity, ImageResizeMode } from "react-native";
 import * as FileSystem from "expo-file-system";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { TreeLayoutInfo } from "@/interfaces";
+import { useCallback, useRef, useState } from "react";
+import { useFileSync } from "@/hooks/useFileSync";
 
 export default function Tab() {
   const router = useRouter();
-  const [fileContent, setFileContent] = useState<TreeLayoutInfo>();
+  // Get file content and refresh key from the sync hook
+  const { fileContent, refreshKey } = useFileSync();
+  
+  // State for controlling image resize mode (contain/cover)
   const [resizeFix, setResizeFix] = useState<ImageResizeMode>("contain");
+  // Ref to track how many times the image has been resized
   const resized = useRef<number>(0);
 
+  // Hook that runs when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
+      // Skip resizing if we've already done it twice
       if (resized.current == 2) {
         resized.current = 0;
         return;
       }
+      // Function to toggle between 'contain' and 'cover' resize modes
       const alternateResizeMode = () => {
         setResizeFix(prev => prev === "contain" ? "cover" : "contain");
         resized.current++;
@@ -25,73 +32,20 @@ export default function Tab() {
     }, [resizeFix])
   );
 
-  //file check
-  useEffect(() => {
-    const fileUri = FileSystem.documentDirectory + "treeLayout.json";
-    const checkExist = async () => {
-      const fileExist = await FileSystem.getInfoAsync(fileUri);
-      if (!fileExist.exists) {
-        try {
-          await FileSystem.writeAsStringAsync(fileUri, "{}", {
-            encoding: FileSystem.EncodingType.UTF8,
-          });
-        } catch (e) {
-          console.error("Error while creating empty file: ", e);
-          return;
-        }
-      }
-    };
-    checkExist();
-
-    const getData = async () => {
-      try {
-        const fileContent = await FileSystem.readAsStringAsync(fileUri, {
-          encoding: FileSystem.EncodingType.UTF8,
-        });
-
-        const jsonData = JSON.parse(fileContent) as TreeLayoutInfo;
-        setFileContent(jsonData);
-      } catch (e) {
-        console.error("Error reading file content: ", e);
-        return null;
-      }
-    };
-
-    getData();
-  }, []);
-
-  const deleteAllFiles = async () => {
-    try {
-      if (!FileSystem.documentDirectory) {
-        return;
-      }
-      const files = await FileSystem.readDirectoryAsync(
-        FileSystem.documentDirectory
-      );
-
-      await Promise.all(
-        files.map(async (file) => {
-          const fileUri = `${FileSystem.documentDirectory}${file}`;
-          await FileSystem.deleteAsync(fileUri);
-        })
-      );
-
-      console.log("All files in document directory deleted");
-    } catch (error) {
-      console.error("Error deleting files:", error);
-    }
-  };
-
-  const layoutData = fileContent ? fileContent.layout : {};
+  // Extract layout data from file content or use empty object
+  const layoutData = fileContent?.layout || {};
+  // Check if there's a pot with a tree in the layout
   const hasPotTree = layoutData && "pot" in layoutData && layoutData["pot"];
 
   return (
     <View style={styles.container}>
+      {/* Background image */}
       <Image
         source={require("@/assets/images/background.png")}
         style={styles.backgroundImage}
       />
       
+      {/* Interactive area for the pot/tree */}
       <TouchableOpacity
         style={hasPotTree ? styles.treeContainer : styles.potContainer}
         onPress={() =>
@@ -101,13 +55,15 @@ export default function Tab() {
           })
         }
       >
+        {/* Show either the tree (if planted) or just the pot */}
         {hasPotTree ? (
           <Image
             source={{
-              uri: FileSystem.documentDirectory + "trees/" + layoutData["pot"],
+              uri: `${FileSystem.documentDirectory}trees/${layoutData["pot"]}?refresh=${refreshKey}`,
             }}
             style={styles.tree}
             resizeMode={resizeFix}
+            key={refreshKey} // Important for forcing image reload
           />
         ) : (
           <Image
@@ -120,6 +76,7 @@ export default function Tab() {
   );
 }
 
+// Style definitions
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -150,8 +107,8 @@ const styles = StyleSheet.create({
     height: 50,
   },
   tree: {
-    width: 300,
-    height: 400,
+    width: 800,
+    height: 1000,
     marginBottom: -50, // Adjust to make tree base align with pot position
   },
 });

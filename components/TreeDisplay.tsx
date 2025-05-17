@@ -1,24 +1,49 @@
-import { useState } from "react";
+// Updated TreeDisplay.tsx
+
+import { useState, useEffect } from "react";
 import { Image, TouchableOpacity } from "react-native";
 import * as FileSystem from "expo-file-system";
 import useChoose from "@/hooks/useChoose";
 
 interface TreeDisplayProps {
-  buttonName: string;
   treeName: string;
+  buttonName: string;
   isDeleting: boolean;
-  pushBeingDelete: (newTree: string) => void;
-  removeBeingDelete: (newTree: string) => void;
+  resetKey?: string; // New prop to trigger reset
+  pushBeingDelete: (tree: string) => void;
+  removeBeingDelete: (tree: string) => void;
+  refreshKey: number;
 }
+
 export default function TreeDisplay({
   treeName,
   buttonName,
   isDeleting,
+  resetKey,
   pushBeingDelete,
   removeBeingDelete,
+  refreshKey = 0, // Default value
 }: TreeDisplayProps) {
   const [isBeingDeleted, setIsBeingDeleted] = useState(false);
   const handleChoose = useChoose();
+  
+  // Add effect to reset selected state when resetKey changes
+  useEffect(() => {
+    // When going back to normal mode, reset the deleted state
+    if (resetKey === "normal" && isBeingDeleted) {
+      setIsBeingDeleted(false);
+      // Also ensure we remove this tree from the parent's selection array
+      removeBeingDelete(treeName);
+    }
+  }, [resetKey, removeBeingDelete, treeName]);
+
+  // Additional check: when isDeleting becomes false, reset selection
+  useEffect(() => {
+    if (!isDeleting && isBeingDeleted) {
+      setIsBeingDeleted(false);
+      removeBeingDelete(treeName);
+    }
+  }, [isDeleting, isBeingDeleted, removeBeingDelete, treeName]);
 
   const handleSelectDelete = () => {
     setIsBeingDeleted((b) => !b);
@@ -29,6 +54,9 @@ export default function TreeDisplay({
     }
   };
 
+  // Add cache-busting to image URI
+  const imageUri = `${FileSystem.documentDirectory}trees/${treeName}?refresh=${refreshKey}`;
+
   return (
     <TouchableOpacity
       onPress={() =>
@@ -36,11 +64,19 @@ export default function TreeDisplay({
       }
     >
       <Image
-        source={{ uri: FileSystem.documentDirectory + "trees/" + treeName }}
+        source={{ uri: imageUri }}
         style={[
-          { bottom: 0, width: 200, height: 200, borderRadius: 10, borderColor: "red", borderWidth: 10, overflow: "hidden", position: "relative" },
-          isBeingDeleted ? { borderWidth: 3 } : { borderWidth: 0 },
+          {
+            width: 200,
+            height: 200,
+            borderRadius: 10,
+            borderColor: "red",
+            borderWidth: isBeingDeleted ? 3 : 0,
+            overflow: "hidden",
+          },
         ]}
+        key={`${treeName}-${refreshKey}`} // Force re-render on refresh
+        onError={(e) => console.log("Image load error:", e.nativeEvent.error)}
       />
     </TouchableOpacity>
   );
