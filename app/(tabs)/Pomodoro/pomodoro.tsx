@@ -11,7 +11,7 @@ import {
 import * as FileSystem from "expo-file-system";
 import { setting } from "@/interfaces";
 import { Ionicons } from "@expo/vector-icons";
-import * as Sharing from "expo-sharing";
+import { Storage } from 'expo-storage';
 
 const PomodoroTimer = () => {
   const [appState, setAppState] = useState(AppState.currentState);
@@ -60,6 +60,21 @@ const PomodoroTimer = () => {
 
     checkExist();
   }, []);
+
+  // testing
+  useFocusEffect(() => {
+    const getName = async () => {
+      try {
+        const item = await Storage.getItem({ key: "name" })
+        if (item !== null) {
+          console.log(item);
+          
+        }
+      } catch (error) {
+        // Handle invalid keys or read failures
+      }
+    };
+  });
 
   const loadSettings = useCallback(async () => {
     try {
