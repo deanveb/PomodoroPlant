@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
     height: 50,
   },
   tree: {
-    width: 300,
-    height: 400,
+    width: 800,
+    height: 1000,
     marginBottom: -50, // Adjust to make tree base align with pot position
   },
 });

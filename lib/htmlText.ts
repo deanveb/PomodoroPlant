@@ -1,110 +1,89 @@
 export const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
-        <style>
-          body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 500px;
-            height: 500px;
-          }
-          canvas {
-            display: block;
-          }
-        </style>
-      </head>
-      <body>
-        <script>
-          let rules = {
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 500px;
+  height: 500px;
+}
+canvas {
+  display: block;
+}
+</style>
+</head>
+<body>
+<script>
+let rules = {
   X: [
     // Original rule
-    { rule: "F[+X][-X]FX",  prob: 0.5 },
-    
-    // Fewer limbs
-    { rule: "F[-X]FX",      prob: 0.05 },
-    { rule: "F[+X]FX",      prob: 0.05 },
-    
-    // Extra rotation
-    { rule: "F[++X][-X]FX", prob: 0.1 },
-    { rule: "F[+X][--X]FX", prob: 0.1 },
-    
-    // Berries/fruits
-    { rule: "F[+X][-X]FA",  prob: 0.1 },
-    { rule: "F[+X][-X]FB",  prob: 0.1 }
+    { rule: "F[+X][+X]-F[-X][+X]FB", prob: 0.5 },
+    { rule: "F[+X][-X][-X]-F[X][X]+F[-X][+X]+FB", prob: 0.25 },
+    { rule: "F[-X][+X][+X]+F[X][X]-F[-X][+X]+FB", prob: 0.25 }
+    //{ rule: "FF+[[X]-X]+F[-FX]+X", prob: 0.5}
   ],
   F: [
-    // Original rule
-    { rule: "FF",  prob: 0.85 },
-    
-    // Extra growth
-    { rule: "FFF", prob: 0.05 },
-    
-    // Stunted growth
-    { rule: "F",   prob: 0.1 },
+    { rule: "FF", prob: 0.9999 },
+    { rule: "FFF", prob: 0.0001 },
   ]
 };
-
-const len = 4;
+const len = 6;
 const ang = 25;
-const numGens = 6;
-
+const numGens = 5;
 let drawRules;
-
 let word = "X";
 
 function setup() {
-  createCanvas(600, 600);
-  
+  createCanvas(1000, 650);
   strokeWeight(2);
+  clear(); // Clear the canvas initially
   
   drawRules = {
-    "A": () => {
-      // Draw circle at current location
-      noStroke();
-      fill("#E5CEDC");
-      circle(0, 0, len*2);
-    },  
+    /*"B": () => {
+      strokeWeight(20);
+      stroke(" #FBB7DD");
+      line(0, 0, 0, -len);
+      translate(0, -len);*/
     "B": () => {
-      // Draw circle at current location
-      noStroke();
-      fill("#FCA17D");
-      circle(0, 0, len*2);
+      strokeWeight(1);
+      stroke("#FBB7DD");
+      fill("#FBB7DD")
+      arc(0, 0, 35, 35, 180, 360, CHORD);
     },
     "F": () => {
-      // Draw line forward, then move to end of line
-      stroke("#9ea93f");
+      stroke("#BF8065");
+      strokeWeight(6);
       line(0, 0, 0, -len);
       translate(0, -len);
     },
     "+": () => {
-      // Rotate right
-      rotate(PI/180 * -ang);
+      rotate(PI/180 * -(ang+random(25)));
     },
     "-": () => {
-      // Rotate right
-      rotate(PI/180 * ang);
+      rotate(PI/180 * (ang+random(25)));
     },
-    // Save current location
     "[": push,
-    // Restore last location
     "]": pop,
   };
-  
   noLoop();
 }
 
 function draw() {
+  // Use clear() instead of background(0) for transparency
+  clear();
+  
   // Generate our L-System from the start
   word = "X";
-  
   for(let i = 0; i < numGens; i ++) {
     word = generate();
+    console.log(word);
   }
   
   // Draw L-System
@@ -114,19 +93,17 @@ function draw() {
     let c = word[i];
     if(c in drawRules) {
       drawRules[c]();
-    }  
+    }
   }
   pop();
 }
 
 function generate() {
   let next = ""
-  
   for(let i = 0; i < word.length; i ++) {
     let c = word[i];
     if(c in rules) {
       let rule = rules[c];
-      
       // Check if we're using an array or not
       if(Array.isArray(rule)) {
         next += chooseOne(rule); // If we are, choose one of the options
@@ -137,7 +114,6 @@ function generate() {
       next += c;
     }
   }
-  
   return next;
 }
 
@@ -154,10 +130,11 @@ function chooseOne(ruleSet) {
 }
 
 function saveCanvasImage() {
+  // For better transparency in PNG exports
   const base64 = canvas.toDataURL('image/png');
   window.ReactNativeWebView.postMessage(base64);
 }
-        </script>
-      </body>
-    </html>
-  `;
+</script>
+</body>
+</html>
+`;
