@@ -1,11 +1,48 @@
-0.When app (Check if file exist for every tab)
-1.Pot not empty after deleting the current tree
-2.Inventory not being updated after saving tree
-3.Replace push stack
-4.Visual don't update after switching from delete mode to normal mode
+0.When switching tabs too fast, file cant load fast enough --> file isnt created, not sync up to date
+=> SOL: check if file exist, if not create new file
+
+1. In inventory/garden: Pot not empty after deleting the current potted tree --> not sync-ing problem
+=> SOL: file check (problem 0)
+
+2. open inventory, switch to pomodoro get tree then go back to inventory, inventory isnt updated, new tree isnt added
+=> SOL: file check (problem 0)
+
+3. Replace push stack 
+
+4. In inventory: after deleting tree(s), tree slots are still there.
+=> SOL: refresh
+
 5.fix light/dark theme
+
 6.Tree can be duplicated when pressing save multiple times in pomodoro finished tab (?)
+=> SOL: ??
+
+7. No popup/notif/exit-save-tree-tab when saving tree
+=> SOL: add popup and exit-save-tree function
+
+
 
 TINH NANG MOI:
 - run background (in notification tab)
 - choose app to study, if not in one of selected app(s) for 10 minutes, appear popup: "dmm hoc di"
+
+RUN APP WITH cmd: ./start.sh
+
+GIT COMMANDS:
+1. Setup git (once):
+    git config --global user.name "your username"
+    git config --global user.email "your email"
+2. Clone repo:
+    git clone https://github.com/username/repo.git
+    cd repo
+    (**start coding) code .
+3. Make changes, commit and push:
+    git status
+    git add .
+    git commit -m "your message"
+    git push origin main (or whatever your branch name is; if "git push", pushes to current connected branch)
+4. Pull latest changes:
+    git pull origin main (similar to above)
+5. Create and switch branch:
+    git checkout -b new-branch-name
+    git push origin new-branch-name
