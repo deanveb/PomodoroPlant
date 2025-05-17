@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#4caf50", // xanh lá cây
     padding: 10,
     borderRadius: 5,
+    alignItems: "center",
     borderColor : "#388e3c", // xanh đậm
   },
     buttonText: {
