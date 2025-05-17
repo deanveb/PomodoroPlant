@@ -1,4 +1,5 @@
 (finished) 0.When switching tabs too fast, file cant load fast enough --> file isnt created, not sync up to date
+
 => SOL: check if file exist, if not create new file
 
 (finished) 1. In inventory/garden: Pot not empty after deleting the current potted tree --> not sync-ing problem
