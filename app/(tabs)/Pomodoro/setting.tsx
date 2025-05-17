@@ -161,16 +161,16 @@ export default function SettingsScreen() {
       <View style={styles.container}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>
-            <Ionicons name="settings-outline" size={34} color="#4B5320" /> Cài Đặt
+            <Ionicons name="settings-outline" size={34} color="#4B5320" /> Settings
           </Text>
         </View>
 
         <ScrollView>
           <View style={styles.settingContainer}>
-            <Text style={styles.subtitle}>Chỉnh thời gian</Text>
+            <Text style={styles.subtitle}>Change Timer</Text>
             <View style={styles.timeContainer}>
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Pomodoro (phút)</Text>
+                <Text style={styles.label}>Pomodoro (minutes)</Text>
                 <TextInput
                   style={styles.input}
                   onChangeText={(text) => setLocalSettings(prev => ({...prev, work: text}))}
@@ -180,7 +180,7 @@ export default function SettingsScreen() {
                 />
               </View>
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Nghỉ ngắn (phút)</Text>
+                <Text style={styles.label}>Short break (minutes)</Text>
                 <TextInput
                   style={styles.input}
                   onChangeText={(text) => setLocalSettings(prev => ({...prev, shortBreak: text}))}
@@ -190,7 +190,7 @@ export default function SettingsScreen() {
                 />
               </View>
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Nghỉ dài (phút)</Text>
+                <Text style={styles.label}>Long break (minutes)</Text>
                 <TextInput
                   style={styles.input}
                   onChangeText={(text) => setLocalSettings(prev => ({...prev, longBreak: text}))}
@@ -200,7 +200,7 @@ export default function SettingsScreen() {
                 />
               </View>
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Số kỳ</Text>
+                <Text style={styles.label}>Session</Text>
                 <TextInput
                   style={styles.input}
                   onChangeText={(text) => setLocalSettings(prev => ({...prev, session: text}))}
@@ -216,7 +216,7 @@ export default function SettingsScreen() {
         <View>
           {error && <Text style={styles.errorText}>{error}</Text>}
           <TouchableOpacity style={styles.button} onPress={handleSave}>
-            <Text style={styles.buttonText}>Lưu cài đặt</Text>
+            <Text style={styles.buttonText}>Save</Text>
           </TouchableOpacity>
         </View>
       </View>
