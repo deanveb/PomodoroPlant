@@ -12,7 +12,11 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL":"libsql://pomodoroplant-deanveb.aws-ap-south-1.turso.io",
+        "EXPO_PUBLIC_API_KEY":"eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NDc0NDk3NjMsImlkIjoiZTM4Zjk4YzctYjBhYS00ZTJlLWFhNDktOGUxMTVhYjhhMWRlIiwicmlkIjoiYzIzMjRmM2QtNGYxMC00NGY0LTk1ZjMtY2E4MWVmZDg5NjU4In0.sBt2Z7cIjLFnlFU47SEwULCdLxzRc7fj5QaFcP-ScMzSWbGp1i_mEkTwYkBV9MraFpVh6SMhe1emYjlwGcbYDQ"
+      }
     },
     "development-simulator": {
       "developmentClient": true,

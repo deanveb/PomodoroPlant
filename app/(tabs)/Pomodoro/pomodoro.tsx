@@ -34,6 +34,7 @@ const PomodoroTimer = () => {
   const longBreakDurationRef = useRef(15 * 60);
   const shortBreakDurationRef = useRef(5 * 60);
   const longBreakIntervalRef = useRef(1);
+  const trackTime = useRef(0);
 
   const breakDuration = useRef(shortBreakDurationRef.current);
 
@@ -106,7 +107,7 @@ const PomodoroTimer = () => {
         ? "shortBreak"
         : "longBreak";
 
-    workDurationRef.current = fileContent.workDuration / 60 || 25 * 60;
+    workDurationRef.current = fileContent.workDuration || 25 * 60;
     shortBreakDurationRef.current = fileContent.shortBreakDuration || 5 * 60;
     longBreakDurationRef.current = fileContent.longBreakDuration || 15 * 60;
     longBreakIntervalRef.current = fileContent.session || 4;
@@ -128,6 +129,7 @@ const PomodoroTimer = () => {
       timerRef.current = setInterval(() => {
         const remainingTime = currentTime.current - changeToSecond(Date.now() - startTime);
         setTimeLeft(remainingTime);
+        trackTime.current++;
         if (remainingTime === 0) {
           handleTimerEnd();
         }
@@ -154,7 +156,6 @@ const PomodoroTimer = () => {
           nextAppState === "active"
         ) {
           if (isActive) {
-            // console.log("hi");
             
             currentTime.current = Math.max(
               0,
@@ -163,7 +164,28 @@ const PomodoroTimer = () => {
             setTimeLeft(currentTime.current);
             setStartTime(Date.now());
           }
-        } setAppState(nextAppState);
+        } else {
+          const addUserTime = async (input : number) => {
+            try {
+              const res = await fetch('https://pomodoro-api-azure.vercel.app/api/submit', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  time : input,
+                }),
+              });
+
+              const data = await res.json();
+              console.log('User added:', data);
+            } catch (err) {
+              console.error('Failed to add user:', err);
+            }
+          };
+          addUserTime(trackTime.current);
+        } 
+        setAppState(nextAppState);
       });
     }
   }, [appState, startTime]);
