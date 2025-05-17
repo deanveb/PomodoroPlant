@@ -1,9 +1,10 @@
-0.Check if file exist for every tab
+0.When app (Check if file exist for every tab)
 1.Pot not empty after deleting the current tree
 2.Inventory not being updated after saving tree
 3.Replace push stack
 4.Visual don't update after switching from delete mode to normal mode
 5.fix light/dark theme
+6.Tree can be duplicated when pressing save multiple times in pomodoro finished tab (?)
 
 TINH NANG MOI:
 - run background (in notification tab)
