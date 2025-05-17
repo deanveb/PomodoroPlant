@@ -1,5 +1,4 @@
 import { useFocusEffect, useRouter } from "expo-router";
-import { useEffect } from "react";
 import { View, Text } from "react-native";
 
 export default function app() {

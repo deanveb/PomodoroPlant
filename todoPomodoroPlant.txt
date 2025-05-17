@@ -1,23 +1,23 @@
-0.When switching tabs too fast, file cant load fast enough --> file isnt created, not sync up to date
+(finished) 0.When switching tabs too fast, file cant load fast enough --> file isnt created, not sync up to date
 => SOL: check if file exist, if not create new file
 
-1. In inventory/garden: Pot not empty after deleting the current potted tree --> not sync-ing problem
+(finished) 1. In inventory/garden: Pot not empty after deleting the current potted tree --> not sync-ing problem
+=> SOL: file check (problem 0) 
+
+(finished) 2. open inventory, switch to pomodoro get tree then go back to inventory, inventory isnt updated, new tree isnt added
 => SOL: file check (problem 0)
 
-2. open inventory, switch to pomodoro get tree then go back to inventory, inventory isnt updated, new tree isnt added
-=> SOL: file check (problem 0)
+(?) 3. Replace push stack 
 
-3. Replace push stack 
-
-4. In inventory: after deleting tree(s), tree slots are still there.
+(finished) 4. In inventory: after deleting tree(s), tree slots are still there.
 => SOL: refresh
 
-5.fix light/dark theme
+(finished) 5.fix light/dark theme
 
-6.Tree can be duplicated when pressing save multiple times in pomodoro finished tab (?)
+(finished) 6.Tree can be duplicated when pressing save multiple times in pomodoro finished tab (?)
 => SOL: ??
 
-7. No popup/notif/exit-save-tree-tab when saving tree
+(finished) 7. No popup/notif/exit-save-tree-tab when saving tree
 => SOL: add popup and exit-save-tree function
 
 

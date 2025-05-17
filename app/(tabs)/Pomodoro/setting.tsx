@@ -1,281 +1,301 @@
 import { useEffect, useState } from "react";
 import * as FileSystem from "expo-file-system";
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView} from "react-native";
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { setting } from "@/interfaces";
 import { Ionicons } from '@expo/vector-icons';
 
+// Define the setting interface directly in the file
+interface Setting {
+  workDuration: number;
+  shortBreakDuration: number;
+  longBreakDuration: number;
+  session: number;
+}
 
-export default function App() {
+export default function SettingsScreen() {
   const router = useRouter();
-  const [setting, setSetting] = useState({
-    work : "25",
-    shortBreak : "5",
-    longBreak : "15",
-    session : "2",
-  })
+  const [localSettings, setLocalSettings] = useState({
+    work: "25",
+    shortBreak: "5",
+    longBreak: "15",
+    session: "2",
+  });
   const [error, setError] = useState<string>();
-  const [fileContent, setFileContent] = useState<setting>();
+  const [fileContent, setFileContent] = useState<Setting>();
 
   const fileUri = FileSystem.documentDirectory + "setting.json";
 
   useEffect(() => {
-    const checkExist = async () => {
-      const fileExist = await FileSystem.getInfoAsync(fileUri);
-      if (!fileExist.exists) {
-        try {
-          await FileSystem.writeAsStringAsync(fileUri, "{}", {
-            encoding: FileSystem.EncodingType.UTF8,
-          });
-        } catch (e) {
-          console.error("Error while creating empty file: ", e);
-        }
-      }
-    };
-    checkExist();
-
-    const getData = async () => {
+    const initializeSettings = async () => {
       try {
-        const FileContent = await FileSystem.readAsStringAsync(fileUri, {
-          encoding: FileSystem.EncodingType.UTF8,
-        });
-
-        const jsonData = JSON.parse(FileContent) as setting;
-        console.log(`got ${jsonData}`);
-        setFileContent(jsonData);
-      } catch (e) {
-        console.error("Error reading file content: ", e);
-        return null;
-      }
-    };
-    getData();
-    
-  }, []);
-
-  useEffect(() => {
-    if (fileContent) {
-      setSetting(prev => ({...prev, work : String(fileContent.workDuration / 60)}));
-      setSetting(prev => ({...prev, shortBreak : String(fileContent.shortBreakDuration / 60)}));
-      setSetting(prev => ({...prev, longBreak : String(fileContent.longBreakDuration / 60)}));
-      setSetting(prev => ({...prev, session : String(fileContent.session)}));
-    }
-    // console.log("hi",fileContent.);
-  }, [fileContent])
-
-  const handleSave = () => {  
-    const saveSettings = async (value : setting) => {
-      try {
-        const jsonValue = JSON.stringify(value);
-        await FileSystem.writeAsStringAsync(
-          fileUri,
-          jsonValue,
-          { encoding: FileSystem.EncodingType.UTF8 }
-        );
-        console.log(`Saved ${jsonValue}`);
-      } catch (e) {
-        console.error("while storing data: ",e);
-      }
-    };
-
-    // In seconds
-    const data : setting = {
-      workDuration : 0,
-      shortBreakDuration : 0,
-      longBreakDuration : 0,
-      session : 0,
-    }
-
-    for (const [key, value] of Object.entries(setting)) {
-      if (value !== "") {
-        if (!parseInt(value)) {
-          setError(`${key} không hợp lệ(chỉ có thể ghi chữ số và các số phải lớn hơn 0)`);
+        // Check if file exists
+        const fileInfo = await FileSystem.getInfoAsync(fileUri);
+        
+        // Create file with default values if it doesn't exist
+        if (!fileInfo.exists) {
+          const defaultSettings: Setting = {
+            workDuration: 25 * 60,
+            shortBreakDuration: 5 * 60,
+            longBreakDuration: 15 * 60,
+            session: 4
+          };
+          await FileSystem.writeAsStringAsync(
+            fileUri,
+            JSON.stringify(defaultSettings),
+            { encoding: FileSystem.EncodingType.UTF8 }
+          );
+          setFileContent(defaultSettings);
           return;
         }
-      } else {
-        setError("Không được để ô trống");
-        return;
+
+        // Load existing settings
+        const fileContent = await FileSystem.readAsStringAsync(fileUri);
+        const parsedSettings = JSON.parse(fileContent) as Setting;
+        setFileContent(parsedSettings);
+        
+      } catch (error) {
+        console.error("Error initializing settings:", error);
+        setError("Không thể tải cài đặt");
       }
-    } 
+    };
 
-    data.session = Math.min(parseInt(setting.session), 10**5);
-    data.longBreakDuration = Math.min(parseInt(setting.longBreak) * 60, 5940);
-    data.shortBreakDuration = Math.min(parseInt(setting.shortBreak) * 60, 5940);
-    data.workDuration = Math.min(parseInt(setting.work) * 60, 5940);
+    initializeSettings();
+  }, []);
 
+  // Update local settings when file content changes
+  useEffect(() => {
+    if (fileContent) {
+      setLocalSettings({
+        work: String(Math.floor(fileContent.workDuration / 60 )),
+        shortBreak: String(Math.floor(fileContent.shortBreakDuration / 60)),
+        longBreak: String(Math.floor(fileContent.longBreakDuration / 60)),
+        session: String(fileContent.session),
+      });
+    }
+  }, [fileContent]);
 
-    // console.log(`data:${data}`);
+  const validateInputs = (): boolean => {
+    // First check for empty fields
+    if (!localSettings.work.trim() || !localSettings.shortBreak.trim() || 
+        !localSettings.longBreak.trim() || !localSettings.session.trim()) {
+      setError("Vui lòng điền đầy đủ thông tin");
+      return false;
+    }
+  
+    // Improved number validation
+    const workValue = localSettings.work.replace(',', '.'); // Handle comma decimals
+    const shortBreakValue = localSettings.shortBreak.replace(',', '.');
+    const longBreakValue = localSettings.longBreak.replace(',', '.');
+    const sessionValue = localSettings.session.replace(',', '.');
+  
+    if (!/^\d+$/.test(workValue)) {
+      setError("Pomodoro phải là số nguyên dương");
+      return false;
+    }
+    if (!/^\d+$/.test(shortBreakValue)) {
+      setError("Nghỉ ngắn phải là số nguyên dương");
+      return false;
+    }
+    if (!/^\d+$/.test(longBreakValue)) {
+      setError("Nghỉ dài phải là số nguyên dương");
+      return false;
+    }
+    if (!/^\d+$/.test(sessionValue)) {
+      setError("Kỳ phải là số nguyên dương");
+      return false;
+    }
+  
+    // Convert to numbers after validation
+    const workNum = parseInt(workValue);
+    const shortBreakNum = parseInt(shortBreakValue);
+    const longBreakNum = parseInt(longBreakValue);
+    const sessionNum = parseInt(sessionValue);
+  
+    // Check positive values
+    if (workNum <= 0) {
+      setError("Pomodoro phải lớn hơn 0");
+      return false;
+    }
+    if (shortBreakNum <= 0) {
+      setError("Nghỉ ngắn phải lớn hơn 0");
+      return false;
+    }
+    if (longBreakNum <= 0) {
+      setError("Nghỉ dài phải lớn hơn 0");
+      return false;
+    }
+    if (sessionNum <= 0) {
+      setError("Kỳ phải lớn hơn 0");
+      return false;
+    }
+  
+    return true;
+  };
 
-    saveSettings(data);
-    
-    router.replace("/(tabs)/Pomodoro/pomodoro");
+  const handleSave = async () => {
+    if (!validateInputs()) return;
+
+    try {
+      const newSettings: Setting = {
+        workDuration: Math.min(Number(localSettings.work) * 60, 5940), // Max 99 minutes
+        shortBreakDuration: Math.min(Number(localSettings.shortBreak) * 60, 5940),
+        longBreakDuration: Math.min(Number(localSettings.longBreak) * 60, 5940),
+        session: Math.min(Number(localSettings.session), 100), // Max 100 sessions
+      };
+
+      await FileSystem.writeAsStringAsync(
+        fileUri,
+        JSON.stringify(newSettings),
+        { encoding: FileSystem.EncodingType.UTF8 }
+      );
+
+      router.replace("/(tabs)/Pomodoro/pomodoro");
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      setError("Lỗi khi lưu cài đặt");
+    }
   };
 
   return (
-	<View style={styles.backgroundContainer}>
-    <View style={styles.container}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>
-              <Ionicons name="settings-outline" size={34} color="#4B5320" /> Cài Đặt
-            </Text>
-          </View>
-    
-          <ScrollView>
-            <View style={styles.settingContainer}>
-              <Text style={styles.subtitle}>Chỉnh thời gian</Text>
-              <View style={styles.timeContainer}>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Pomodoro</Text>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => {
-                      setSetting(prev => ({...prev, work : text}))
-                    }}
-                    value={String(setting.work)}
-                    inputMode="numeric"
-                  />
-                </View>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Nghỉ ngắn</Text>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => {
-                      setSetting(prev => ({...prev, shortBreak : text}));
-                    }}
-                    value={String(setting.shortBreak)}
-                    inputMode="numeric"
-                  />
-                </View>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Nghỉ dài</Text>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => {
-                      setSetting(prev => ({...prev, longBreak : text}))
-                    }}
-                    value={String(setting.longBreak)}
-                    inputMode="numeric"
-                  />
-                </View>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Kỳ</Text>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => {
-                      setSetting(prev => ({...prev, session : text}))
-                    }}
-                    value={String(setting.session)}
-                    inputMode="numeric"
-                  />
-                </View>
+    <View style={styles.backgroundContainer}>
+      <View style={styles.container}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>
+            <Ionicons name="settings-outline" size={34} color="#4B5320" /> Cài Đặt
+          </Text>
+        </View>
+
+        <ScrollView>
+          <View style={styles.settingContainer}>
+            <Text style={styles.subtitle}>Chỉnh thời gian</Text>
+            <View style={styles.timeContainer}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Pomodoro (phút)</Text>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={(text) => setLocalSettings(prev => ({...prev, work: text}))}
+                  value={localSettings.work}
+                  keyboardType="numeric"
+                  maxLength={2}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Nghỉ ngắn (phút)</Text>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={(text) => setLocalSettings(prev => ({...prev, shortBreak: text}))}
+                  value={localSettings.shortBreak}
+                  keyboardType="numeric"
+                  maxLength={2}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Nghỉ dài (phút)</Text>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={(text) => setLocalSettings(prev => ({...prev, longBreak: text}))}
+                  value={localSettings.longBreak}
+                  keyboardType="numeric"
+                  maxLength={2}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Số kỳ</Text>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={(text) => setLocalSettings(prev => ({...prev, session: text}))}
+                  value={localSettings.session}
+                  keyboardType="numeric"
+                  maxLength={3}
+                />
               </View>
             </View>
-          </ScrollView>
-          <View>
-            <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity style={styles.button} onPress={handleSave}>
-              <Text style={styles.buttonText}>Lưu</Text>
-            </TouchableOpacity>
           </View>
+        </ScrollView>
+
+        <View>
+          {error && <Text style={styles.errorText}>{error}</Text>}
+          <TouchableOpacity style={styles.button} onPress={handleSave}>
+            <Text style={styles.buttonText}>Lưu cài đặt</Text>
+          </TouchableOpacity>
         </View>
-  </View>
-  )
+      </View>
+    </View>
+  );
 }
 
-// FIXME: Cài đặt bị lệch với icon
 const styles = StyleSheet.create({
   backgroundContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F9FAF3', // Light neutral background
+    backgroundColor: '#F5F5F5',
   },
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    padding: 24,
-    justifyContent: "center",
-    width: "90%",
-    height: "100%",
-    borderRadius: 16,
-    marginTop: 20,
-    elevation: 5,
-    shadowColor: "#7D9445", // Olive green shadow
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    borderWidth: 1,
-    borderColor: "#CEDDA5", // Muted green border
+    padding: 20,
+    margin: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   titleContainer: {
-    borderBottomWidth: 1.5,
-    borderColor: "#B6CF8E", // Sage accent
-    paddingBottom: 12,
-    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderColor: "#E0E0E0",
+    paddingBottom: 15,
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#333",
   },
   settingContainer: {
-    flex: 1,
+    marginBottom: 20,
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 15,
+    color: "#444",
   },
   timeContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    borderBottomWidth: 1.5,
-    borderColor: "#DDEB9D", // Main green-yellow
-    paddingBottom: 16,
   },
   inputContainer: {
-    width: "45%",
+    width: "48%",
     marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "700",
-    textAlign: "center",
-    color: "#4B5320", // Army green
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#7D9445", // Olive green
-    marginBottom: 15,
-    marginTop: 10,
   },
   label: {
     fontSize: 14,
-    fontWeight: "500",
-    marginBottom: 6,
-    color: "#4B5320", // Army green
+    marginBottom: 5,
+    color: "#555",
   },
   input: {
-    borderWidth: 1.5,
-    borderColor: "#B6CF8E", // Sage green
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 16,
-    fontSize: 16,
-    width: "80%",
-    height: 48,
-    margin: 5,
-    backgroundColor: "#F9FAF3", // Soft background
+    borderWidth: 1,
+    borderColor: "#DDD",
+    borderRadius: 5,
+    padding: 10,
+    backgroundColor: "#FAFAFA",
   },
   errorText: {
-    color: '#C86B6B', // Earthy red
-    textAlign: 'center',
-    marginBottom: 8,
-    fontSize: 14,
+    color: "red",
+    textAlign: "center",
+    marginBottom: 10,
   },
   button: {
-    backgroundColor: "#7D9445", // Olive green
-    paddingVertical: 16,
-    borderRadius: 10,
+    backgroundColor: "#4B5320",
+    padding: 15,
+    borderRadius: 5,
     alignItems: "center",
-    marginTop: 8,
-    elevation: 3,
   },
   buttonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-    letterSpacing: 0.5,
+    color: "white",
+    fontWeight: "bold",
   },
 });
